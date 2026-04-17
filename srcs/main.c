@@ -1,20 +1,10 @@
 #include "libft.h"
 #include "lemipc.h"
 
-void	create_key_path(const char *file)
-{
-	int	fd = open(file, O_CREAT, 0644);
-	if (fd < 0) {
-		ft_dprintf(STDERR_FILENO, "%s: open: \n", PROGRAM_NAME, strerror(errno));
-		return;
-	}
-	close(fd);
-}
-
 int	main(int argc, char **argv)
 {
 	if (argc < 2) { 
-		ft_dprintf(STDERR_FILENO, "Usage: %s <team_id>\n", PROGRAM_NAME);
+		ft_dprintf(STDERR_FILENO, "Usage: ./%s <team_id>\n", PROGRAM_NAME);
 		return 1;
 	}
 
@@ -29,14 +19,17 @@ int	main(int argc, char **argv)
 		return 1;
 	}
 
-	create_key_path(IPC_KEY_PATH);
-	key_t	key = ftok(IPC_KEY_PATH, IPC_KEY_ID);
-	if (key < 0) {
-		ft_dprintf(STDERR_FILENO, "%s: ftok: %s\n", PROGRAM_NAME, strerror(errno));
+	t_ipc	ipc;
+	if (init_ipc(&ipc)) {
+		ft_dprintf(STDERR_FILENO, "%s: Failed to init ipc\n", PROGRAM_NAME);
 		return 1;
 	}
 
-	
+	for (size_t i = 0; i < (size_t)BOARD_SIZE; i++) {
+		ft_printf("%d ", ipc.board->map[i]);
+		if ((i + 1) % BOARD_WIDTH == 0)
+			ft_printf("\n");
+	}
 
 	return 0;
 }

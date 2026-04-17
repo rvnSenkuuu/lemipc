@@ -7,6 +7,7 @@ INCS_DIR    = ./incs/
 INCS    = $(INCS_DIR)/lemipc.h
 
 SRCS    = srcs/main.c \
+			srcs/ipc.c
 
 OBJS_DIR = .objs/
 OBJS    = $(patsubst %.c, $(OBJS_DIR)%.o, $(SRCS))
