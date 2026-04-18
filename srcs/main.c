@@ -28,8 +28,7 @@ int	main(int argc, char **argv)
 	for (size_t i = 0; i < (size_t)BOARD_SIZE; i++) {
 		ft_printf("%d ", ipc.board->map[i]);
 		if ((i + 1) % BOARD_WIDTH == 0)
-			ft_printf("\n");
+		ft_printf("\n");
 	}
-
 	return 0;
 }
