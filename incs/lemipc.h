@@ -44,4 +44,7 @@ typedef struct {
 
 int	init_ipc(t_ipc *ipc);
 
+void	sem_lock(t_ipc *ipc);
+void	sem_unlock(t_ipc *ipc);
+
 #endif

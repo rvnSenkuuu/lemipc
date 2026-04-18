@@ -7,7 +7,8 @@ INCS_DIR    = ./incs/
 INCS    = $(INCS_DIR)/lemipc.h
 
 SRCS    = srcs/main.c \
-			srcs/ipc.c
+			srcs/ipc.c \
+			srcs/board_lock.c
 
 OBJS_DIR = .objs/
 OBJS    = $(patsubst %.c, $(OBJS_DIR)%.o, $(SRCS))
@@ -30,7 +31,7 @@ $(LIBFT):
 	$(MAKE) -C $(LIBFT_PATH)
 
 clean:
-	$(RM) $(OBJS_DIR)
+	$(RM) $(OBJS_DIR) ./lemipc_key
 	$(MAKE) clean -C $(LIBFT_PATH)
 
 fclean: clean

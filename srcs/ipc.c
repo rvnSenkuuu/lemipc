@@ -28,8 +28,11 @@ static int	init_shm(t_ipc *ipc, key_t key)
 	}
 
 	ipc->board = board;
-	if (ipc->first_process)
+	if (ipc->first_process) {
 		ft_memset(ipc->board->map, 0, BOARD_SIZE * sizeof(int));
+		ipc->board->client_count = 0;
+		ipc->board->player_count = 0;
+	}
 	
 	return 0;
 }
@@ -57,7 +60,7 @@ static int	init_msgq(t_ipc *ipc, key_t key)
 {
 	ipc->msgq_id = msgget(key, IPC_CREAT | IPC_EXCL | 0644);
 	if (ipc->msgq_id < 0) {
-		ipc->msgq_id = msgget(key, 0664);
+		ipc->msgq_id = msgget(key, 0644);
 		if (ipc->msgq_id < 0) {
 			ft_dprintf(STDERR_FILENO, "%s: msgget: %s\n", PROGRAM_NAME, strerror(errno));
 			return 1;
@@ -98,5 +101,6 @@ int	init_ipc(t_ipc *ipc)
 		return 1;
 	}
 
+	ipc->board->client_count++;
 	return 0;
 }
