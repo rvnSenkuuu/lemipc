@@ -8,7 +8,8 @@ INCS    = $(INCS_DIR)/lemipc.h
 
 SRCS    = srcs/main.c \
 			srcs/ipc.c \
-			srcs/board_lock.c
+			srcs/board_lock.c \
+			srcs/player.c
 
 OBJS_DIR = .objs/
 OBJS    = $(patsubst %.c, $(OBJS_DIR)%.o, $(SRCS))

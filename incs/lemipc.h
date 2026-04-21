@@ -2,6 +2,7 @@
 #define LEMIPC_H
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 #include <errno.h>
@@ -20,6 +21,8 @@
 #define BOARD_WIDTH 10
 #define BOARD_HEIGHT 10
 #define BOARD_SIZE BOARD_WIDTH * BOARD_HEIGHT
+
+#define EMPTY_SLOT 0
 
 typedef struct {
 	int	client_count;
@@ -46,5 +49,7 @@ int	init_ipc(t_ipc *ipc);
 
 void	sem_lock(t_ipc *ipc);
 void	sem_unlock(t_ipc *ipc);
+
+int	put_player_on_board(t_ipc *ipc, t_player *player);
 
 #endif
