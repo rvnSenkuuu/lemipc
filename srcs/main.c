@@ -13,17 +13,19 @@ void	display_map(int *map)
 
 void	start_game(t_ipc *ipc, t_player *player)
 {
+	int i = 0;
 	while (player->alive) {
 		sem_lock(ipc);
-		display_map(ipc->board->map);
-		if (check_player_around(ipc->board, player)) {
+		if (check_player_around(ipc->board, player) || i == 20) {
 			remove_player_from_board(ipc->board, player);
 			sem_unlock(ipc);
 			ft_dprintf(STDOUT_FILENO, "Player is dead\n");
 			break;
 		}
+		display_map(ipc->board->map);
 		sem_unlock(ipc);
 		sleep(1);
+		i++;
 	}
 }
 

@@ -72,8 +72,22 @@ static int	init_msgq(t_ipc *ipc, key_t key)
 
 void	clean_ipc(t_ipc *ipc)
 {
-	(void)ipc;
-	TODO("game finished should clean ipc");
+	sem_lock(ipc);
+	ipc->board->client_count--;
+
+	if (ipc->board->client_count == 0) {
+		sem_unlock(ipc);
+		if (shmdt(ipc->board) < 0)
+			ft_dprintf(STDERR_FILENO, "%s: shmdt: %s\n", PROGRAM_NAME, strerror(errno));
+		if (shmctl(ipc->shm_id, IPC_RMID, NULL) < 0)
+			ft_dprintf(STDERR_FILENO, "%s: shmctl(IPC_RMID): %s\n", PROGRAM_NAME, strerror(errno));
+		if (semctl(ipc->sem_id, 0, IPC_RMID) < 0)
+			ft_dprintf(STDERR_FILENO, "%s: semctl(IPC_RMID): %s\n", PROGRAM_NAME, strerror(errno));
+		if (msgctl(ipc->msgq_id, IPC_RMID, NULL) < 0)
+			ft_dprintf(STDERR_FILENO, "%s: msgctl(IPC_RMID): %s\n", PROGRAM_NAME, strerror(errno));
+	} else {
+		sem_unlock(ipc);
+	}
 }
 
 int	init_ipc(t_ipc *ipc)
