@@ -1,6 +1,32 @@
 #include "libft.h"
 #include "lemipc.h"
 
+void	display_map(int *map)
+{
+	ft_dprintf(STDOUT_FILENO, "\033[H\033[2J"); //clear screen
+	for (size_t i = 0; i < BOARD_SIZE; i++) {
+		ft_printf("%d ", map[i]);
+		if ((i + 1) % BOARD_WIDTH == 0)
+			ft_printf("\n");
+	}
+}
+
+void	start_game(t_ipc *ipc, t_player *player)
+{
+	while (player->alive) {
+		sem_lock(ipc);
+		display_map(ipc->board->map);
+		if (check_player_around(ipc->board, player)) {
+			remove_player_from_board(ipc->board, player);
+			sem_unlock(ipc);
+			ft_dprintf(STDOUT_FILENO, "Player is dead\n");
+			break;
+		}
+		sem_unlock(ipc);
+		sleep(1);
+	}
+}
+
 int	main(int argc, char **argv)
 {
 	if (argc < 2) { 
@@ -29,10 +55,7 @@ int	main(int argc, char **argv)
 		return 1;
 	}
 
-	for (size_t i = 0; i < (size_t)BOARD_SIZE; i++) {
-		ft_printf("%d ", ipc.board->map[i]);
-		if ((i + 1) % BOARD_WIDTH == 0)
-			ft_printf("\n");
-	}
+	start_game(&ipc, &player);
+	clean_ipc(&ipc);
 	return 0;
 }

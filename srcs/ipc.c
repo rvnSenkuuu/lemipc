@@ -13,7 +13,7 @@ static void	create_key_path(const char *file)
 
 static int	init_shm(t_ipc *ipc, key_t key)
 {
-	size_t	shm_sz = sizeof(t_board) + (BOARD_SIZE * sizeof(int));
+	size_t	shm_sz = sizeof(t_board);
 	
 	ipc->shm_id = shmget(key, shm_sz, IPC_CREAT | IPC_EXCL | 0644);
 	if (ipc->shm_id < 0) {
@@ -46,9 +46,10 @@ static int	init_sem(t_ipc *ipc, key_t key)
 			ft_dprintf(STDERR_FILENO, "%s: semget: %s\n", PROGRAM_NAME, strerror(errno));
 			return 1;
 		}
+		return 0;
 	}
 
-	if (semctl(ipc->sem_id, 0, SETVAL, 0) < 0) {
+	if (semctl(ipc->sem_id, 0, SETVAL, 1) < 0) {
 		ft_dprintf(STDERR_FILENO, "%s: semctl: %s\n", PROGRAM_NAME, strerror(errno));
 		return 1;
 	}
@@ -67,6 +68,12 @@ static int	init_msgq(t_ipc *ipc, key_t key)
 		}
 	}
 	return 0;
+}
+
+void	clean_ipc(t_ipc *ipc)
+{
+	(void)ipc;
+	TODO("game finished should clean ipc");
 }
 
 int	init_ipc(t_ipc *ipc)

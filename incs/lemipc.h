@@ -1,6 +1,7 @@
 #ifndef LEMIPC_H
 #define LEMIPC_H
 
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -21,8 +22,10 @@
 #define BOARD_WIDTH 10
 #define BOARD_HEIGHT 10
 #define BOARD_SIZE BOARD_WIDTH * BOARD_HEIGHT
-
 #define EMPTY_SLOT 0
+
+#define ARRAY_LEN(x) (sizeof(x) / sizeof((x)[0]))
+#define TODO(message) do { fprintf(stderr, "%s:%d: TODO: %s\n", __FILE__, __LINE__, message); abort(); } while(0)
 
 typedef struct {
 	int	client_count;
@@ -45,11 +48,14 @@ typedef struct {
 	t_board	*board;
 } t_ipc;
 
+void	clean_ipc(t_ipc *ipc);
 int	init_ipc(t_ipc *ipc);
 
 void	sem_lock(t_ipc *ipc);
 void	sem_unlock(t_ipc *ipc);
 
+void	remove_player_from_board(t_board *board, t_player *player);
 int	put_player_on_board(t_ipc *ipc, t_player *player);
+int	check_player_around(t_board *board, t_player *player);
 
 #endif
