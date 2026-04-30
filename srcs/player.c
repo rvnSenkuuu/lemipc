@@ -2,7 +2,6 @@
 
 int	put_player_on_board(t_ipc *ipc, t_player *player)
 {
-	srand(0);
 	sem_lock(ipc);
 	if (ipc->board->player_count == BOARD_SIZE) { 
 		sem_unlock(ipc);
@@ -53,4 +52,39 @@ int	check_player_around(t_board *board, t_player *player)
 			return 1;
 
 	return 0;
+}
+
+void	update_player_pos(t_board *board, t_player *player, int new_x, int new_y)
+{
+	if (new_x <= 0 || new_x >= BOARD_WIDTH || new_y <= 0 || new_y >= BOARD_HEIGHT)
+		return;
+	board->map[player->pos_x + player->pos_y * BOARD_HEIGHT] = EMPTY_SLOT;
+	board->map[new_x + new_y * BOARD_HEIGHT] = player->team_id;
+	player->pos_x = new_x;
+	player->pos_y = new_y;
+}
+
+void	move_player(t_ipc *ipc, t_player *player)
+{
+	sem_lock(ipc);
+	e_dir	dir = rand() % __dir_count;
+
+	int	new_x = player->pos_x;
+	int	new_y = player->pos_y;
+	for (int tries = 0; tries < 4; tries++) {
+		if (dir == UP)
+			new_y = player->pos_y - 1;
+		else if (dir == DOWN)
+			new_y = player->pos_y + 1;
+		else if (dir == LEFT)
+			new_x = player->pos_x - 1;
+		else
+			new_x = player->pos_x + 1;
+		
+		if (ipc->board->map[new_x + new_y * BOARD_HEIGHT] == EMPTY_SLOT) {
+			update_player_pos(ipc->board, player, new_x, new_y);
+			break;
+		}
+	}
+	sem_unlock(ipc);
 }
