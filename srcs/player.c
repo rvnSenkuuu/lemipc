@@ -12,10 +12,10 @@ int	put_player_on_board(t_ipc *ipc, t_player *player)
 		int	x = rand() % BOARD_WIDTH;
 		int	y = rand() % BOARD_HEIGHT;
 
-		if (ipc->board->map[x + y * BOARD_HEIGHT] == EMPTY_SLOT) {
+		if (ipc->board->map[x + y * BOARD_WIDTH] == EMPTY_SLOT) {
 			player->pos_x = x;
 			player->pos_y = y;
-			ipc->board->map[x + y * BOARD_HEIGHT] = player->team_id;
+			ipc->board->map[x + y * BOARD_WIDTH] = player->team_id;
 			break;
 		}
 	}
@@ -41,7 +41,7 @@ int	check_player_around(t_board *board, t_player *player)
 				continue;
 			if (x < 0 || x >= BOARD_WIDTH || y < 0 || y >= BOARD_HEIGHT)
 				continue;
-			int	team_id = board->map[x + y * BOARD_HEIGHT];
+			int	team_id = board->map[x + y * BOARD_WIDTH];
 			if (team_id > EMPTY_SLOT && team_id != player->team_id)
 				teams[team_id]++;
 		}
@@ -56,10 +56,10 @@ int	check_player_around(t_board *board, t_player *player)
 
 void	update_player_pos(t_board *board, t_player *player, int new_x, int new_y)
 {
-	if (new_x <= 0 || new_x >= BOARD_WIDTH || new_y <= 0 || new_y >= BOARD_HEIGHT)
+	if (new_x < 0 || new_x >= BOARD_WIDTH || new_y < 0 || new_y >= BOARD_HEIGHT)
 		return;
-	board->map[player->pos_x + player->pos_y * BOARD_HEIGHT] = EMPTY_SLOT;
-	board->map[new_x + new_y * BOARD_HEIGHT] = player->team_id;
+	board->map[player->pos_x + player->pos_y * BOARD_WIDTH] = EMPTY_SLOT;
+	board->map[new_x + new_y * BOARD_WIDTH] = player->team_id;
 	player->pos_x = new_x;
 	player->pos_y = new_y;
 }
@@ -67,21 +67,21 @@ void	update_player_pos(t_board *board, t_player *player, int new_x, int new_y)
 void	move_player(t_ipc *ipc, t_player *player)
 {
 	sem_lock(ipc);
-	e_dir	dir = rand() % __dir_count;
-
-	int	new_x = player->pos_x;
-	int	new_y = player->pos_y;
 	for (int tries = 0; tries < 4; tries++) {
+		int	new_x = player->pos_x;
+		int	new_y = player->pos_y;
+		e_dir	dir = rand() % __dir_count;
+
 		if (dir == UP)
-			new_y = player->pos_y - 1;
+			new_y--;
 		else if (dir == DOWN)
-			new_y = player->pos_y + 1;
+			new_y++;
 		else if (dir == LEFT)
-			new_x = player->pos_x - 1;
+			new_x--;
 		else
-			new_x = player->pos_x + 1;
+			new_x++;
 		
-		if (ipc->board->map[new_x + new_y * BOARD_HEIGHT] == EMPTY_SLOT) {
+		if (ipc->board->map[new_x + new_y * BOARD_WIDTH] == EMPTY_SLOT) {
 			update_player_pos(ipc->board, player, new_x, new_y);
 			break;
 		}
