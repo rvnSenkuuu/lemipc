@@ -28,7 +28,7 @@ int	put_player_on_board(t_ipc *ipc, t_player *player)
 void	remove_player_from_board(t_board *board, t_player *player)
 {
 	player->alive = false;
-	board->map[player->pos_x + player->pos_y * BOARD_HEIGHT] = EMPTY_SLOT;
+	board->map[player->pos_x + player->pos_y * BOARD_WIDTH] = EMPTY_SLOT;
 	board->player_count--;
 }
 
@@ -64,9 +64,8 @@ void	update_player_pos(t_board *board, t_player *player, int new_x, int new_y)
 	player->pos_y = new_y;
 }
 
-void	move_player(t_ipc *ipc, t_player *player)
+void	random_move_player(t_ipc *ipc, t_player *player)
 {
-	sem_lock(ipc);
 	for (int tries = 0; tries < 4; tries++) {
 		int	new_x = player->pos_x;
 		int	new_y = player->pos_y;
@@ -86,5 +85,4 @@ void	move_player(t_ipc *ipc, t_player *player)
 			break;
 		}
 	}
-	sem_unlock(ipc);
 }

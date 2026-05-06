@@ -8,6 +8,7 @@
 #include <stdbool.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <time.h>
 #include <sys/stat.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -63,7 +64,7 @@ void	sem_lock(t_ipc *ipc);
 void	sem_unlock(t_ipc *ipc);
 
 void	remove_player_from_board(t_board *board, t_player *player);
-void	move_player(t_ipc *ipc, t_player *player);
+void	random_move_player(t_ipc *ipc, t_player *player);
 int	put_player_on_board(t_ipc *ipc, t_player *player);
 int	check_player_around(t_board *board, t_player *player);
 

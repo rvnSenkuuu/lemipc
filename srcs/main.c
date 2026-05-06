@@ -23,7 +23,7 @@ void	start_game(t_ipc *ipc, t_player *player)
 			break;
 		}
 		display_map(ipc->board->map);
-		move_player(ipc, player);
+		random_move_player(ipc, player);
 		sem_unlock(ipc);
 		sleep(1);
 		i++;
@@ -58,7 +58,7 @@ int	main(int argc, char **argv)
 		return 1;
 	}
 
-	srand(0);
+	srand(time(NULL));
 	start_game(&ipc, &player);
 	clean_ipc(&ipc);
 	return 0;
