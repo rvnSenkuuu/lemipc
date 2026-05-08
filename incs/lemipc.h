@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 #include <string.h>
 #include <stdbool.h>
 #include <errno.h>
@@ -37,6 +38,13 @@ typedef enum {
 } e_dir;
 
 typedef struct {
+	long	team_id;
+	int	target_x;
+	int	target_y;
+	int	target_id;
+} t_msg;
+
+typedef struct {
 	int	client_count;
 	int	player_count;
 	int	map[BOARD_SIZE];
@@ -65,7 +73,11 @@ void	sem_unlock(t_ipc *ipc);
 
 void	remove_player_from_board(t_board *board, t_player *player);
 void	random_move_player(t_ipc *ipc, t_player *player);
+void	find_nearest_target(t_board *board, t_player *player, t_player *target);
 int	put_player_on_board(t_ipc *ipc, t_player *player);
 int	check_player_around(t_board *board, t_player *player);
+
+void	send_target_to_team(t_ipc *ipc, t_player *target, int player_team_id);
+int	receive_target_from_team(t_ipc *ipc, t_msg *msg, int team_id);
 
 #endif

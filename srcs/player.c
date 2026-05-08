@@ -54,6 +54,24 @@ int	check_player_around(t_board *board, t_player *player)
 	return 0;
 }
 
+void	find_nearest_target(t_board *board, t_player *player, t_player *target)
+{
+	int	dist = INT_MAX;
+	for (int y = 0; y < BOARD_WIDTH; y++) {
+		for (int x = 0; x < BOARD_HEIGHT; x++) {
+			int	cell = board->map[x + y * BOARD_WIDTH];
+			if (cell == EMPTY_SLOT || cell == player->team_id)
+				continue;
+			int	current_dist = abs(player->pos_x - x) + abs(player->pos_y - y);
+			if (current_dist < dist) {
+				dist = current_dist;
+				target->pos_x = x;
+				target->pos_y = y;
+			}
+		}
+	}
+}
+
 void	update_player_pos(t_board *board, t_player *player, int new_x, int new_y)
 {
 	if (new_x < 0 || new_x >= BOARD_WIDTH || new_y < 0 || new_y >= BOARD_HEIGHT)

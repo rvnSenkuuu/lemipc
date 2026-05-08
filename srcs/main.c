@@ -16,6 +16,17 @@ void	start_game(t_ipc *ipc, t_player *player)
 	int i = 0;
 	while (player->alive) {
 		sem_lock(ipc);
+		
+		t_msg	msg;
+		t_player	target = {.pos_x = -1, .pos_y = -1};
+		
+		if (!receive_target_from_team(ipc, &msg, player->team_id)) {
+			target.pos_x = msg.target_x;
+			target.pos_y = msg.target_y;
+			target.team_id = msg.target_id;
+		}
+		
+		//TODO: more game end check condition
 		if (check_player_around(ipc->board, player) || i == 30) {
 			remove_player_from_board(ipc->board, player);
 			sem_unlock(ipc);
@@ -23,6 +34,12 @@ void	start_game(t_ipc *ipc, t_player *player)
 			break;
 		}
 		display_map(ipc->board->map);
+		
+		if (target.pos_x == -1)
+			find_nearest_target(ipc->board, player, &target);
+		send_target_to_team(ipc, &target, player->team_id);
+		
+		//TODO: move player to the target if we cannot do a random move
 		random_move_player(ipc, player);
 		sem_unlock(ipc);
 		sleep(1);
