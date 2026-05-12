@@ -10,7 +10,8 @@ SRCS    = srcs/main.c \
 			srcs/ipc.c \
 			srcs/board_lock.c \
 			srcs/player.c \
-			srcs/msg.c
+			srcs/msg.c \
+			srcs/game_utils.c
 
 OBJS_DIR = .objs/
 OBJS    = $(patsubst %.c, $(OBJS_DIR)%.o, $(SRCS))

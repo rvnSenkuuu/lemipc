@@ -32,6 +32,7 @@ static int	init_shm(t_ipc *ipc, key_t key)
 		ft_memset(ipc->board->map, 0, BOARD_SIZE * sizeof(int));
 		ipc->board->client_count = 0;
 		ipc->board->player_count = 0;
+		ipc->board->state = GAME_WAITING;
 	}
 	
 	return 0;

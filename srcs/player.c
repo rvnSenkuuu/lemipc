@@ -56,7 +56,7 @@ int	check_player_around(t_board *board, t_player *player)
 
 void	find_nearest_target(t_board *board, t_player *player, t_player *target)
 {
-	int	dist = INT_MAX;
+	int	dist = BOARD_SIZE;
 	for (int y = 0; y < BOARD_WIDTH; y++) {
 		for (int x = 0; x < BOARD_HEIGHT; x++) {
 			int	cell = board->map[x + y * BOARD_WIDTH];
@@ -82,12 +82,16 @@ void	update_player_pos(t_board *board, t_player *player, int new_x, int new_y)
 	player->pos_y = new_y;
 }
 
-void	random_move_player(t_ipc *ipc, t_player *player)
+void	random_move(t_board *board, t_player *player)
 {
-	for (int tries = 0; tries < 4; tries++) {
+	int	tried_dir[__dir_count] = {0};
+	for (int tries = 0; tries < __dir_count; tries++) {
 		int	new_x = player->pos_x;
 		int	new_y = player->pos_y;
 		e_dir	dir = rand() % __dir_count;
+		
+		if (tried_dir[dir])
+			continue;
 
 		if (dir == UP)
 			new_y--;
@@ -95,12 +99,44 @@ void	random_move_player(t_ipc *ipc, t_player *player)
 			new_y++;
 		else if (dir == LEFT)
 			new_x--;
-		else
+		else if (dir == RIGHT)
 			new_x++;
 		
-		if (ipc->board->map[new_x + new_y * BOARD_WIDTH] == EMPTY_SLOT) {
-			update_player_pos(ipc->board, player, new_x, new_y);
+		if (board->map[new_x + new_y * BOARD_WIDTH] == EMPTY_SLOT) {
+			update_player_pos(board, player, new_x, new_y);
 			break;
 		}
+
+		tried_dir[dir] = 1;
 	}
+}
+
+#define GET_DIST(x1, y1, x2, y2) (abs(x1 - x2) + abs(y1 - y2))
+
+static inline bool	is_empty_cell(t_board *board, int x, int y)
+{
+	return board->map[x + y * BOARD_WIDTH] == EMPTY_SLOT;
+}
+
+void	move_player(t_board *board, t_player *player, t_player *target)
+{
+	if (target->pos_x == -1)
+		random_move(board, player);
+
+	int	new_x = player->pos_x;
+	int	new_y = player->pos_y;
+	int	distance = GET_DIST(player->pos_x, player->pos_y, target->pos_x, target->pos_y);
+
+	if (is_empty_cell(board, player->pos_x, player->pos_y - 1) && distance > GET_DIST(player->pos_x, player->pos_y - 1, target->pos_x, target->pos_y))
+		new_y--;
+	else if (is_empty_cell(board, player->pos_x, player->pos_y + 1) && distance > GET_DIST(player->pos_x, player->pos_y + 1, target->pos_x, target->pos_y))
+		new_y++;
+	else if (is_empty_cell(board, player->pos_x - 1, player->pos_y) && distance > GET_DIST(player->pos_x - 1, player->pos_y, target->pos_x, target->pos_y))
+		new_x--;
+	else if (is_empty_cell(board, player->pos_x + 1, player->pos_y) && distance > GET_DIST(player->pos_x + 1, player->pos_y, target->pos_x, target->pos_y))
+		new_x++;
+	else
+		return random_move(board, player);
+
+	update_player_pos(board, player, new_x, new_y);
 }

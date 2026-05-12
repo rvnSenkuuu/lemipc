@@ -17,7 +17,7 @@ void	send_target_to_team(t_ipc *ipc, t_player *target, int player_team_id)
 
 int	receive_target_from_team(t_ipc *ipc, t_msg *msg, int team_id)
 {
-	if (msgrcv(ipc->msgq_id, msg, sizeof(msg) - sizeof(long), team_id, IPC_NOWAIT) != -1)
+	if (msgrcv(ipc->msgq_id, msg, sizeof(*msg) - sizeof(long), team_id, IPC_NOWAIT) != -1)
 		return 0;
 
 	if (errno != EAGAIN && errno != ENOMSG)

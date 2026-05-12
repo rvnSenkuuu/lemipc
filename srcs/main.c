@@ -1,21 +1,40 @@
 #include "libft.h"
 #include "lemipc.h"
 
-void	display_map(int *map)
+static void	wait_for_players(t_ipc *ipc)
 {
-	ft_dprintf(STDOUT_FILENO, "\033[H\033[2J"); //clear screen
-	for (size_t i = 0; i < BOARD_SIZE; i++) {
-		ft_printf("%d ", map[i]);
-		if ((i + 1) % BOARD_WIDTH == 0)
-			ft_printf("\n");
+	sem_lock(ipc);
+	while (ipc->board->player_count < MIN_PLAYER && ipc->board->state == GAME_WAITING) {
+		ft_dprintf(STDOUT_FILENO, "Waiting for player...\n");
+		sleep(1);
 	}
+	if (ipc->board->state == PLAYER_DEAD
+		|| ipc->board->state == ONE_TEAM_REMAINING
+		|| ipc->board->state == GAME_DRAW) {
+			sem_unlock(ipc);
+			return;
+		}
+
+	ipc->board->state = GAME_RUNNING;
+	sem_unlock(ipc);
 }
 
-void	start_game(t_ipc *ipc, t_player *player)
+static void	leave_game(t_ipc *ipc, t_player *player)
 {
-	int i = 0;
-	while (player->alive) {
+	remove_player_from_board(ipc->board, player);
+	print_leave_reason(ipc->board->state, player->team_id);
+}
+
+static void	start_game(t_ipc *ipc, t_player *player)
+{
+	while (1) {
 		sem_lock(ipc);
+		ipc->board->state = check_end_condition(ipc->board, player);
+		if (ipc->board->state != GAME_RUNNING) {
+			leave_game(ipc, player);
+			sem_unlock(ipc);
+			break;
+		}
 		
 		t_msg	msg;
 		t_player	target = {.pos_x = -1, .pos_y = -1};
@@ -25,25 +44,14 @@ void	start_game(t_ipc *ipc, t_player *player)
 			target.pos_y = msg.target_y;
 			target.team_id = msg.target_id;
 		}
-		
-		//TODO: more game end check condition
-		if (check_player_around(ipc->board, player) || i == 30) {
-			remove_player_from_board(ipc->board, player);
-			sem_unlock(ipc);
-			ft_dprintf(STDOUT_FILENO, "Player is dead\n");
-			break;
-		}
 		display_map(ipc->board->map);
 		
 		if (target.pos_x == -1)
 			find_nearest_target(ipc->board, player, &target);
 		send_target_to_team(ipc, &target, player->team_id);
-		
-		//TODO: move player to the target if we cannot do a random move
-		random_move_player(ipc, player);
+		move_player(ipc->board, player, &target);
 		sem_unlock(ipc);
 		sleep(1);
-		i++;
 	}
 }
 
@@ -76,6 +84,7 @@ int	main(int argc, char **argv)
 	}
 
 	srand(time(NULL));
+	wait_for_players(&ipc);
 	start_game(&ipc, &player);
 	clean_ipc(&ipc);
 	return 0;
