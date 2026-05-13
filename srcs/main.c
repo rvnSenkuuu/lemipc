@@ -38,16 +38,15 @@ static void	start_game(t_ipc *ipc, t_player *player)
 		
 		t_msg	msg;
 		t_player	target = {.pos_x = -1, .pos_y = -1};
-		
 		if (!receive_target_from_team(ipc, &msg, player->team_id)) {
 			target.pos_x = msg.target_x;
 			target.pos_y = msg.target_y;
 			target.team_id = msg.target_id;
+		} else {
+			find_nearest_target(ipc->board, player, &target);
 		}
 		display_map(ipc->board->map);
-		
-		if (target.pos_x == -1)
-			find_nearest_target(ipc->board, player, &target);
+
 		send_target_to_team(ipc, &target, player->team_id);
 		move_player(ipc->board, player, &target);
 		sem_unlock(ipc);

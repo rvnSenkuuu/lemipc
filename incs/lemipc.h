@@ -17,7 +17,6 @@
 #include <sys/msg.h>
 
 #define PROGRAM_NAME "lemipc"
-
 #define IPC_KEY_PATH "./lemipc_key"
 #define IPC_KEY_ID 0x4242
 
@@ -27,6 +26,10 @@
 #define EMPTY_SLOT 0
 #define MIN_PLAYER 4
 
+#define __X_POS 0
+#define __Y_POS 1
+
+#define GET_DIST(x1, y1, x2, y2) (abs(x1 - x2) + abs(y1 - y2))
 #define ARRAY_LEN(x) (sizeof(x) / sizeof((x)[0]))
 #define TODO(message) do { fprintf(stderr, "%s:%d: TODO: %s\n", __FILE__, __LINE__, message); abort(); } while(0)
 
