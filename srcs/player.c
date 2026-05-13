@@ -34,7 +34,8 @@ void	remove_player_from_board(t_board *board, t_player *player)
 
 int	check_player_around(t_board *board, t_player *player)
 {
-	int	teams[128] = {0};
+	int	cells[9];
+	int	count = 0;
 	for (int x = player->pos_x - 1; x <= player->pos_x + 1; x++) {
 		for (int y = player->pos_y - 1; y <= player->pos_y + 1; y++) {
 			if (x == player->pos_x && y == player->pos_y)
@@ -43,13 +44,16 @@ int	check_player_around(t_board *board, t_player *player)
 				continue;
 			int	team_id = board->map[x + y * BOARD_WIDTH];
 			if (team_id > EMPTY_SLOT && team_id != player->team_id)
-				teams[team_id]++;
+				cells[count++] = team_id;
 		}
 	}
 
-	for (size_t i = 0; i < ARRAY_LEN(teams); i++)
-		if (teams[i] >= 2)
-			return 1;
+	for (int i = 0; i < count; i++) {
+		for (int j = i + 1; j < count; j++) {
+			if (cells[i] == cells[j])
+				return 1;
+		}
+	}
 
 	return 0;
 }

@@ -20,8 +20,8 @@
 #define IPC_KEY_PATH "./lemipc_key"
 #define IPC_KEY_ID 0x4242
 
-#define BOARD_WIDTH 20
-#define BOARD_HEIGHT 11
+#define BOARD_WIDTH 5
+#define BOARD_HEIGHT 5
 #define BOARD_SIZE BOARD_WIDTH * BOARD_HEIGHT
 #define EMPTY_SLOT 0
 #define MIN_PLAYER 4
