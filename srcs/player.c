@@ -66,7 +66,7 @@ void	find_nearest_target(t_board *board, t_player *player, t_player *target)
 			int	cell = board->map[x + y * BOARD_WIDTH];
 			if (cell == EMPTY_SLOT || cell == player->team_id)
 				continue;
-			int	current_dist = abs(player->pos_x - x) + abs(player->pos_y - y);
+			int	current_dist = GET_DIST(player->pos_x, player->pos_y, x, y);
 			if (current_dist < dist) {
 				dist = current_dist;
 				target->pos_x = x;
