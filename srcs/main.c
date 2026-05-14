@@ -37,7 +37,11 @@ static void	start_game(t_ipc *ipc, t_player *player)
 		}
 		
 		t_msg	msg;
-		t_player	target = {.pos_x = -1, .pos_y = -1};
+		t_player	target = {
+			.alive = false,
+			.pos_x = -1,
+			.pos_y = -1,
+			.team_id = -1};
 		if (!receive_target_from_team(ipc, &msg, player->team_id)) {
 			target.pos_x = msg.target_x;
 			target.pos_y = msg.target_y;

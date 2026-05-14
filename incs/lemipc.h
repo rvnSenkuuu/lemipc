@@ -71,6 +71,11 @@ typedef struct {
 } t_player;
 
 typedef struct {
+	int	id;
+	int	player_count;
+} t_team_info;
+
+typedef struct {
 	bool	first_process;
 	int	shm_id;
 	int	sem_id;

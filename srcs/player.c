@@ -71,6 +71,7 @@ void	find_nearest_target(t_board *board, t_player *player, t_player *target)
 				dist = current_dist;
 				target->pos_x = x;
 				target->pos_y = y;
+				target->team_id = cell;
 			}
 		}
 	}
@@ -136,7 +137,7 @@ void	move_player(t_board *board, t_player *player, t_player *target)
 		{player->pos_x + 1, player->pos_y},
 		{player->pos_x - 1, player->pos_y}};
 
-	for (int i = 0; i < __dir_count; i++) {
+	for (size_t i = 0; i < ARRAY_LEN(directions); i++) {
 		int	dx = directions[i][__X_POS];
 		int	dy = directions[i][__Y_POS];
 
