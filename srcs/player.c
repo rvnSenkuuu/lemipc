@@ -12,7 +12,7 @@ int	put_player_on_board(t_ipc *ipc, t_player *player)
 		int	x = rand() % BOARD_WIDTH;
 		int	y = rand() % BOARD_HEIGHT;
 
-		if (ipc->board->map[x + y * BOARD_WIDTH] == EMPTY_SLOT) {
+		if (is_empty_cell(ipc->board, x, y)) {
 			player->pos_x = x;
 			player->pos_y = y;
 			ipc->board->map[x + y * BOARD_WIDTH] = player->team_id;
@@ -107,18 +107,13 @@ void	random_move(t_board *board, t_player *player)
 		else if (dir == RIGHT)
 			new_x++;
 		
-		if (board->map[new_x + new_y * BOARD_WIDTH] == EMPTY_SLOT) {
+		if (is_empty_cell(board, new_x, new_y)) {
 			update_player_pos(board, player, new_x, new_y);
 			break;
 		}
 
 		tried_dir[dir] = 1;
 	}
-}
-
-static inline bool	is_empty_cell(t_board *board, int x, int y)
-{
-	return board->map[x + y * BOARD_WIDTH] == EMPTY_SLOT;
 }
 
 void	move_player(t_board *board, t_player *player, t_player *target)

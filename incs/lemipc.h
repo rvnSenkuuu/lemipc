@@ -101,6 +101,7 @@ int	receive_target_from_team(t_ipc *ipc, t_msg *msg, int team_id);
 
 void	display_map(const int *map);
 void	print_leave_reason(e_game_state state, int player_team_id);
+bool	is_empty_cell(t_board *board, int x, int y);
 int	check_end_condition(t_board *board, t_player *player);
 
 #endif

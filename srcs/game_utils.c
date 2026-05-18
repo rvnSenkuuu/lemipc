@@ -92,3 +92,8 @@ void	print_leave_reason(e_game_state state, int player_team_id)
 		break;
 	}
 }
+
+inline bool	is_empty_cell(t_board *board, int x, int y)
+{
+	return board->map[x + y * BOARD_WIDTH] == EMPTY_SLOT;
+}
