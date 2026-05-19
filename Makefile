@@ -6,26 +6,23 @@ LFLAGS = -L$(RAYLIB_LIB) -lraylib -Wl,-rpath,$(abspath $(RAYLIB_LIB)) -lm -ldl -
 RM	= rm -rf
 
 INCS_DIR = ./incs/
-INCS = $(INCS_DIR)/lemipc.h
+
+SRCS_COMMON = srcs/ipc.c \
+			  srcs/board_lock.c \
+			  srcs/player.c \
+			  srcs/msg.c \
+			  srcs/game_utils.c \
 
 SRCS =  srcs/main.c \
-		srcs/ipc.c \
-		srcs/board_lock.c \
-		srcs/player.c \
-		srcs/msg.c \
-		srcs/game_utils.c \
+		$(SRCS_COMMON)
 
 SRCS_GRAPHIC = graphic/main.c \
-			   srcs/ipc.c \
-			   srcs/board_lock.c \
-			   srcs/player.c \
-			   srcs/msg.c \
-			   srcs/game_utils.c \
+		$(SRCS_COMMON)
 
 OBJS_DIR = .objs/
 OBJS = $(patsubst %.c, $(OBJS_DIR)%.o, $(SRCS))
 OBJS_GRAPHIC = $(patsubst %.c, $(OBJS_DIR)%.o, $(SRCS_GRAPHIC))
-D_FILES = $(OBJS:.o=.d)
+D_FILES = $(OBJS:.o=.d) $(OBJS_GRAPHIC:.o=.d)
 
 LIBFT_PATH = ./lib/libft/
 LIBFT_HEADER_PATH = $(LIBFT_PATH)includes/
@@ -36,8 +33,11 @@ RAYLIB_HEADER_PATH = ./lib/raylib/include/
 
 all: $(NAME) $(BONUS_NAME)
 
-$(NAME): $(OBJS) $(INCS) $(LIBFT) 
+$(NAME): $(OBJS) $(INCS_DIR) $(LIBFT) 
 	$(CC) $(CFLAGS) $(OBJS) $(LIBFT) -o $(NAME)
+
+$(BONUS_NAME): $(OBJS_GRAPHIC) $(INCS_DIR) $(LIBFT)
+	$(CC) $(CFLAGS) $(LFLAGS) $(OBJS_GRAPHIC) $(LIBFT) -o $(BONUS_NAME)
 
 $(OBJS_DIR)%.o: %.c
 	mkdir -p $(@D)
@@ -45,9 +45,6 @@ $(OBJS_DIR)%.o: %.c
 
 $(LIBFT):
 	$(MAKE) -C $(LIBFT_PATH)
-
-$(BONUS_NAME): $(OBJS_GRAPHIC) $(INCS) $(LIBFT)
-	$(CC) $(CFLAGS) $(LFLAGS) $(OBJS_GRAPHIC) $(LIBFT) -o $(BONUS_NAME)
 
 clean:
 	$(RM) $(OBJS_DIR) ./lemipc_key
