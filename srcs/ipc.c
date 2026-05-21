@@ -22,7 +22,7 @@ static int	init_shm(t_ipc *ipc, key_t key)
 	}
 
 	t_board	*board = shmat(ipc->shm_id, NULL, 0);
-	if (!board) {
+	if (board == (void *)-1) {
 		ft_dprintf(STDERR_FILENO, "%s: shmat: %s\n", PROGRAM_NAME, strerror(errno));
 		return 1;
 	}

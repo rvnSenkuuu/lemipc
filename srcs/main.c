@@ -49,8 +49,6 @@ static void	start_game(t_ipc *ipc, t_player *player)
 		} else {
 			find_nearest_target(ipc->board, player, &target);
 		}
-		display_map(ipc->board->map);
-
 		send_target_to_team(ipc, &target, player->team_id);
 		move_player(ipc->board, player, &target);
 		sem_unlock(ipc);

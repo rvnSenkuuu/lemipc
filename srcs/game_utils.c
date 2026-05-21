@@ -1,16 +1,6 @@
 #include "libft.h"
 #include "lemipc.h"
 
-void	display_map(const int *map)
-{
-	ft_dprintf(STDOUT_FILENO, "\033[H\033[2J"); //clear screen
-	for (size_t i = 0; i < BOARD_SIZE; i++) {
-		ft_printf("%d ", map[i]);
-		if ((i + 1) % BOARD_WIDTH == 0)
-			ft_printf("\n");
-	}
-}
-
 static int	find_team_index(const t_team_info *teams, const size_t team_count, const int player_id)
 {
 	for (size_t i = 0; i < team_count; i++) {
