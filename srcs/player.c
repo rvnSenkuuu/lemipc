@@ -28,7 +28,8 @@ int	put_player_on_board(t_ipc *ipc, t_player *player)
 void	remove_player_from_board(t_board *board, t_player *player)
 {
 	player->alive = false;
-	board->map[player->pos_x + player->pos_y * BOARD_WIDTH] = EMPTY_SLOT;
+	if (board->map[player->pos_x + player->pos_y * BOARD_WIDTH] == player->team_id)
+		board->map[player->pos_x + player->pos_y * BOARD_WIDTH] = EMPTY_SLOT;
 	board->player_count--;
 }
 
@@ -79,7 +80,7 @@ void	find_nearest_target(t_board *board, t_player *player, t_player *target)
 
 void	update_player_pos(t_board *board, t_player *player, int new_x, int new_y)
 {
-	if (new_x < 0 || new_x >= BOARD_WIDTH || new_y < 0 || new_y >= BOARD_HEIGHT)
+	if (new_x < 0 || new_x >= BOARD_WIDTH || new_y < 0 || new_y >= BOARD_HEIGHT || board->map[new_x + new_y * BOARD_WIDTH] != EMPTY_SLOT)
 		return;
 	board->map[player->pos_x + player->pos_y * BOARD_WIDTH] = EMPTY_SLOT;
 	board->map[new_x + new_y * BOARD_WIDTH] = player->team_id;

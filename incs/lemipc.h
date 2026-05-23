@@ -20,11 +20,11 @@
 #define IPC_KEY_PATH "./lemipc_key"
 #define IPC_KEY_ID 0x4242
 
-#define BOARD_WIDTH 25
-#define BOARD_HEIGHT 20
+#define BOARD_WIDTH 60
+#define BOARD_HEIGHT 55
 #define BOARD_SIZE BOARD_WIDTH * BOARD_HEIGHT
 #define EMPTY_SLOT 0
-#define MIN_PLAYER 4
+#define MIN_PLAYER 10
 
 #define __X_POS 0
 #define __Y_POS 1
@@ -44,7 +44,6 @@ typedef enum {
 typedef enum {
 	GAME_RUNNING,
 	GAME_WAITING,
-	PLAYER_DEAD,
 	ONE_TEAM_REMAINING,
 	GAME_DRAW
 } e_game_state;
@@ -60,6 +59,7 @@ typedef struct {
 	e_game_state	state;
 	int	client_count;
 	int	player_count;
+	int	winner_team;
 	int	map[BOARD_SIZE];
 } t_board;
 
@@ -99,8 +99,9 @@ int	check_player_around(t_board *board, t_player *player);
 void	send_target_to_team(t_ipc *ipc, t_player *target, int player_team_id);
 int	receive_target_from_team(t_ipc *ipc, t_msg *msg, int team_id);
 
-void	print_leave_reason(e_game_state state, int player_team_id);
+void	print_leave_reason(e_game_state state, t_player *player);
 bool	is_empty_cell(t_board *board, int x, int y);
 int	check_end_condition(t_board *board, t_player *player);
+int find_winner_team(t_board *board);
 
 #endif

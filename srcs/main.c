@@ -1,28 +1,42 @@
 #include "libft.h"
 #include "lemipc.h"
 
-static void	wait_for_players(t_ipc *ipc)
+static void wait_for_players(t_ipc *ipc)
 {
-	sem_lock(ipc);
-	while (ipc->board->player_count < MIN_PLAYER && ipc->board->state == GAME_WAITING) {
+    while (1) {
+		sem_lock(ipc);
+		if (ipc->board->player_count >= MIN_PLAYER || ipc->board->state != GAME_WAITING)
+			break;
+		sem_unlock(ipc);
 		ft_dprintf(STDOUT_FILENO, "Waiting for player...\n");
 		sleep(1);
-	}
-	if (ipc->board->state == PLAYER_DEAD
-		|| ipc->board->state == ONE_TEAM_REMAINING
-		|| ipc->board->state == GAME_DRAW) {
-			sem_unlock(ipc);
-			return;
-		}
-
-	ipc->board->state = GAME_RUNNING;
+    }
+	if (ipc->board->state == GAME_RUNNING || ipc->board->state == GAME_WAITING)
+		ipc->board->state = GAME_RUNNING;
 	sem_unlock(ipc);
 }
 
 static void	leave_game(t_ipc *ipc, t_player *player)
 {
+	sem_lock(ipc);
+	e_game_state	state = ipc->board->state;
+	if (state == ONE_TEAM_REMAINING && ipc->board->winner_team == 0)
+		ipc->board->winner_team = find_winner_team(ipc->board);
+
 	remove_player_from_board(ipc->board, player);
-	print_leave_reason(ipc->board->state, player->team_id);
+	if (0)
+		print_leave_reason(state, player);
+	sem_unlock(ipc);
+}
+
+void	display_map(const int *map)
+{
+	ft_dprintf(STDOUT_FILENO, "\033[H\033[2J"); //clear screen
+	for (size_t i = 0; i < BOARD_SIZE; i++) {
+		ft_printf("%d ", map[i]);
+		if ((i + 1) % BOARD_WIDTH == 0)
+			ft_printf("\n");
+	}
 }
 
 static void	start_game(t_ipc *ipc, t_player *player)
@@ -30,7 +44,7 @@ static void	start_game(t_ipc *ipc, t_player *player)
 	while (1) {
 		sem_lock(ipc);
 		ipc->board->state = check_end_condition(ipc->board, player);
-		if (ipc->board->state != GAME_RUNNING) {
+		if (ipc->board->state != GAME_RUNNING || player->alive == false) {
 			leave_game(ipc, player);
 			sem_unlock(ipc);
 			break;
@@ -49,10 +63,13 @@ static void	start_game(t_ipc *ipc, t_player *player)
 		} else {
 			find_nearest_target(ipc->board, player, &target);
 		}
-		send_target_to_team(ipc, &target, player->team_id);
+		if (0)
+			display_map(ipc->board->map);
 		move_player(ipc->board, player, &target);
 		sem_unlock(ipc);
 		sleep(1);
+		// usleep(500000 / (1 * ipc->board->player_count));
+		send_target_to_team(ipc, &target, player->team_id);
 	}
 }
 
@@ -84,7 +101,7 @@ int	main(int argc, char **argv)
 		return 1;
 	}
 
-	srand(time(NULL));
+	srand(time(NULL) ^ getpid());
 	wait_for_players(&ipc);
 	start_game(&ipc, &player);
 	clean_ipc(&ipc);
