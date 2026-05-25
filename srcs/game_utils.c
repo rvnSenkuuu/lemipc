@@ -10,7 +10,7 @@ static int	search_team_index(const t_team_info *teams, const size_t team_count, 
 	return -1;
 }
 
-static void	get_team_and_player_count(t_board *board, size_t *team_count, size_t *killer_team_count)
+void	get_team_and_player_count(t_board *board, size_t *team_count, size_t *killer_team_count)
 {
 	size_t	team_nb = 0;
 	const int	*map = board->map;
@@ -56,13 +56,8 @@ int find_winner_team(t_board *board)
     return -1;
 }
 
-int	check_end_condition(t_board *board, t_player *player)
+e_game_state	update_game_state(t_board *board)
 {
-	if (check_player_around(board, player)) {
-		player->alive = false;
-		return -1;
-	}
-
 	size_t	team_count = 0;
 	size_t	killer_team_count = 0;
 	get_team_and_player_count(board, &team_count, &killer_team_count);
@@ -73,27 +68,6 @@ int	check_end_condition(t_board *board, t_player *player)
 		return GAME_DRAW;
 
 	return GAME_RUNNING;
-}
-
-void	print_leave_reason(e_game_state state, t_player *player)
-{
-	switch (state) {
-	case ONE_TEAM_REMAINING:
-		ft_dprintf(STDOUT_FILENO, "Team %d won the game\n", player->team_id);
-		return;
-	case GAME_DRAW:
-		ft_dprintf(STDOUT_FILENO, "Game is draw\n");
-		return;
-	case GAME_RUNNING:
-	case GAME_WAITING:
-	default:
-		break;
-	}
-
-	if (!player->alive) {
-		ft_dprintf(STDOUT_FILENO, "Player (team %d) is dead\n", player->team_id);
-		return;
-	}
 }
 
 inline bool	is_empty_cell(t_board *board, int x, int y)

@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 set -e
 
-BOARD_HEIGHT=45
-BOARD_WIDTH=50
+HEADER_FILE="incs/lemipc.h"
+
+BOARD_WIDTH=$(grep -E "^#define[[:space:]]+BOARD_WIDTH[[:space:]]+[0-9]+" "$HEADER_FILE" | awk '{print $3}')
+BOARD_HEIGHT=$(grep -E "^#define[[:space:]]+BOARD_HEIGHT[[:space:]]+[0-9]+" "$HEADER_FILE" | awk '{print $3}')
 MIN_PLAYER=3
 MAX_PLAYERS=$((BOARD_HEIGHT * BOARD_WIDTH))
+
+echo "Dimensions de la carte récupérées : $BOARD_WIDTH x $BOARD_HEIGHT ($MAX_PLAYERS cases max)"
 
 read -rp "Nombre de joueurs : " NUM_PLAYERS
 if ! [[ "$NUM_PLAYERS" =~ ^[0-9]+$ ]]; then echo "Entrée invalide"; exit 1; fi
@@ -49,7 +53,7 @@ done
 sleep 0.2
 
 if [[ -x "./glemipc" ]]; then
-  ./glemipc &
+  ./glemipc $NUM_TEAMS &
   VISU_PID=$!
   echo "Visualiseur lancé (PID $VISU_PID). Préparation de l'affichage..."
 else

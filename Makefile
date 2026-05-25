@@ -1,7 +1,7 @@
 NAME = lemipc 
 BONUS_NAME = glemipc 
 CC = cc
-CFLAGS = -Wall -Werror -Wextra -O2 -I$(INCS_DIR) -I$(LIBFT_HEADER_PATH) -I$(RAYLIB_HEADER_PATH) -MMD -MP
+CFLAGS = -Wall -Werror -Wextra -O3 -I$(INCS_DIR) -I$(LIBFT_HEADER_PATH) -I$(RAYLIB_HEADER_PATH) -MMD -MP
 LFLAGS = -L$(RAYLIB_LIB) -lraylib -Wl,-rpath,$(abspath $(RAYLIB_LIB)) -lm -ldl -pthread
 RM	= rm -rf
 

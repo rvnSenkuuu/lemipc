@@ -23,8 +23,6 @@ static void	leave_game(t_ipc *ipc, t_player *player)
 		ipc->board->winner_team = find_winner_team(ipc->board);
 
 	remove_player_from_board(ipc->board, player);
-	if (0)
-		print_leave_reason(state, player);
 	sem_unlock(ipc);
 }
 
@@ -32,13 +30,26 @@ static void	start_game(t_ipc *ipc, t_player *player)
 {
 	while (1) {
 		sem_lock(ipc);
-		ipc->board->state = check_end_condition(ipc->board, player);
-		if (ipc->board->state != GAME_RUNNING || player->alive == false) {
+		e_game_state	current_state = ipc->board->state;
+		if (current_state == ONE_TEAM_REMAINING || current_state == GAME_DRAW) {
 			leave_game(ipc, player);
 			sem_unlock(ipc);
 			break;
 		}
 		
+		if (check_player_around(ipc->board, player)) {
+			leave_game(ipc, player);
+			sem_unlock(ipc);
+			break;
+		}
+
+		ipc->board->state = update_game_state(ipc->board);
+		if (ipc->board->state != GAME_RUNNING) {
+			sem_unlock(ipc);
+			leave_game(ipc, player);
+			break;
+		}
+
 		t_msg	msg = {0};
 		t_player	target = {
 			.alive = false,
@@ -54,7 +65,7 @@ static void	start_game(t_ipc *ipc, t_player *player)
 		}
 		move_player(ipc->board, player, &target);
 		sem_unlock(ipc);
-		usleep(500000 / (1 * ipc->board->player_count));
+		usleep(500000);
 		send_target_to_team(ipc, &target, player->team_id);
 	}
 }

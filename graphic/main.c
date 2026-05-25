@@ -7,7 +7,12 @@
 #define SCREEN_HEIGHT 600
 #define SCREEN_TITLE "Lemipc"
 
-const char	*get_game_state(e_game_state state)
+#define InitIpc init_ipc
+#define CleanIpc clean_ipc
+#define SemLock sem_lock
+#define SemUnlock sem_unlock
+
+static const char	*GetGameState(e_game_state state)
 {
 	const char	*game_state = NULL;
 	switch (state) {
@@ -27,72 +32,86 @@ const char	*get_game_state(e_game_state state)
 	return game_state;
 }
 
-void	draw_board(t_ipc *ipc)
+static void	DrawBoard(t_ipc *ipc, int team_count, Color *team_color)
 {
 	int	board_width = SCREEN_WIDTH - 200;
 	int	board_height = SCREEN_HEIGHT;
 	float	cell_width = (float)board_width / BOARD_WIDTH;
 	float	cell_height = (float)board_height / BOARD_HEIGHT;
 
-	sem_lock(ipc);
+	SemLock(ipc);
 	const int	*map = ipc->board->map;
 
     ClearBackground(BLACK);
 	DrawRectangle(0, 0, board_width, board_height, GetColor(0x181818FF));
+
+	float	slice = 360.0f / team_count;
 	for (int x = 0; x < BOARD_WIDTH; x++) {
 		for (int y = 0; y < BOARD_HEIGHT; y++) {
 			int	cell = map[x + y * BOARD_WIDTH];
 			if (cell == EMPTY_SLOT)
 				continue;
-
 			Rectangle	player = {
 				.x = x * cell_width,
 				.y = y * cell_height,
 				.width = cell_width - 2,
 				.height = cell_height - 2};
-			//TODO: Pick correct color according to team id
-			Color	player_color = (cell == 1) ? RED : BLUE;
+			float	hue = fmod((cell - 1) * slice, 360.0f);
+			Color player_color = ColorFromHSV(hue, 0.85f, 0.95f);
+			*team_color = player_color;
 			DrawRectangleRec(player, player_color);
 		}
 	}
-	sem_unlock(ipc);
+	SemUnlock(ipc);
 }
 
-void	draw_hud(t_ipc *ipc)
+static void	DrawHud(t_ipc *ipc)
 {
 	int	pos_x = (SCREEN_WIDTH - 200) + 15;
 	int	pos_y = 15;
 
-	sem_lock(ipc);
+	SemLock(ipc);
 	e_game_state	state = ipc->board->state;
 	int	player_count = ipc->board->player_count;
-	sem_unlock(ipc);
+	SemUnlock(ipc);
 
-	const char	*game_state = get_game_state(state);
+	const char	*game_state = GetGameState(state);
 	DrawText(TextFormat("Game State: %s", game_state), pos_x, pos_y, 18, RAYWHITE);
 	DrawText(TextFormat("Player Count: %d", player_count), pos_x, pos_y + 40, 18, RAYWHITE);
 }
 
-void	draw_end_game(t_ipc *ipc)
+static void	DrawEndGame(t_ipc *ipc, Color *winner_team_color)
 {
-	sem_lock(ipc);
+	SemLock(ipc);
 	e_game_state	final_state = ipc->board->state;
 	int	winner = ipc->board->winner_team;
-	sem_unlock(ipc);
+	SemUnlock(ipc);
 
 	BeginDrawing();
 	ClearBackground(BLACK);
-	if (final_state == GAME_DRAW)
+	if (final_state == GAME_DRAW) {
 		DrawText("The game is draw", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 20, RAYWHITE);
-	else if (final_state == ONE_TEAM_REMAINING)
+	} else if (final_state == ONE_TEAM_REMAINING) {
 		DrawText(TextFormat("Team %d won !", winner), SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2, 20, RAYWHITE);
+		DrawRectangle(SCREEN_WIDTH / 2 - 70, SCREEN_HEIGHT / 2 + 50, 80, 80, *winner_team_color);
+	}
 	EndDrawing();
 }
 
-int	main(void)
+int	main(int argc, char **argv)
 {
+	if (argc < 2) {
+		fprintf(stderr, "%s: Usage: ./glemipc <team_count>", PROGRAM_NAME);
+		return 1;
+	}
+	int	team_count = ft_atoi(argv[1]);
+	if (team_count < 2) {
+		fprintf(stderr, "%s: Minimum 2 team is required\n", PROGRAM_NAME);
+		return 1;
+	}
+
 	t_ipc	ipc = {0};
-	if (init_ipc(&ipc))
+	if (InitIpc(&ipc))
 		return 1;
 
 	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE);
@@ -108,23 +127,24 @@ int	main(void)
 			break;
 		}
 
-		draw_board(&ipc);
-		draw_hud(&ipc);
+		Color	team_color;
+		DrawBoard(&ipc, team_count, &team_color);
+		DrawHud(&ipc);
 
-		sem_lock(&ipc);
+		SemLock(&ipc);
 		e_game_state	current_state = ipc.board->state;
 		if (current_state == GAME_DRAW || current_state == ONE_TEAM_REMAINING) {
-			sem_unlock(&ipc);
+			SemUnlock(&ipc);
 			EndDrawing();
-			draw_end_game(&ipc);
+			DrawEndGame(&ipc, &team_color);
 			WaitTime(3.0);
 			break;
 		}
-		sem_unlock(&ipc);
+		SemUnlock(&ipc);
 		EndDrawing();
 	}
 
-	clean_ipc(&ipc);
+	CleanIpc(&ipc);
 	CloseWindow();
 	return 0;
 }
