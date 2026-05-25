@@ -22,7 +22,10 @@ static void	leave_game(t_ipc *ipc, t_player *player)
 	if (state == ONE_TEAM_REMAINING && ipc->board->winner_team == 0)
 		ipc->board->winner_team = find_winner_team(ipc->board);
 
-	remove_player_from_board(ipc->board, player);
+	player->alive = false;
+	if (ipc->board->map[player->pos_x + player->pos_y * BOARD_WIDTH] == player->team_id)
+		ipc->board->map[player->pos_x + player->pos_y * BOARD_WIDTH] = EMPTY_SLOT;
+	ipc->board->player_count--;
 	sem_unlock(ipc);
 }
 

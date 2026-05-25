@@ -14,38 +14,32 @@
 
 static const char	*GetGameState(e_game_state state)
 {
-	const char	*game_state = NULL;
-	switch (state) {
-	case GAME_RUNNING:
-		game_state = "Running";
-		break;
-	case GAME_WAITING:
-		game_state = "Waiting";		
-		break;
-	case GAME_DRAW:
-	case ONE_TEAM_REMAINING:
-		game_state = "Finished";
-		break;
-	default:
-		break;
-	}
-	return game_state;
+	if (state == GAME_RUNNING)
+		return "Running";
+	else if (state == GAME_WAITING)
+		return "Waiting";
+	else if (state == GAME_DRAW)
+		return "Draw";
+	else
+		return "Finished";
 }
 
-static void	DrawBoard(t_ipc *ipc, int team_count, Color *team_color)
+static void	DrawGame(t_ipc *ipc, int team_count, Color *team_color)
 {
 	int	board_width = SCREEN_WIDTH - 200;
 	int	board_height = SCREEN_HEIGHT;
 	float	cell_width = (float)board_width / BOARD_WIDTH;
 	float	cell_height = (float)board_height / BOARD_HEIGHT;
+	float	slice = 360.0f / team_count;
 
 	SemLock(ipc);
+	e_game_state	state = ipc->board->state;
+	int	player_count = ipc->board->player_count;
 	const int	*map = ipc->board->map;
+	SemUnlock(ipc);
 
     ClearBackground(BLACK);
 	DrawRectangle(0, 0, board_width, board_height, GetColor(0x181818FF));
-
-	float	slice = 360.0f / team_count;
 	for (int x = 0; x < BOARD_WIDTH; x++) {
 		for (int y = 0; y < BOARD_HEIGHT; y++) {
 			int	cell = map[x + y * BOARD_WIDTH];
@@ -62,22 +56,11 @@ static void	DrawBoard(t_ipc *ipc, int team_count, Color *team_color)
 			DrawRectangleRec(player, player_color);
 		}
 	}
-	SemUnlock(ipc);
-}
 
-static void	DrawHud(t_ipc *ipc)
-{
-	int	pos_x = (SCREEN_WIDTH - 200) + 15;
-	int	pos_y = 15;
-
-	SemLock(ipc);
-	e_game_state	state = ipc->board->state;
-	int	player_count = ipc->board->player_count;
-	SemUnlock(ipc);
-
-	const char	*game_state = GetGameState(state);
-	DrawText(TextFormat("Game State: %s", game_state), pos_x, pos_y, 18, RAYWHITE);
-	DrawText(TextFormat("Player Count: %d", player_count), pos_x, pos_y + 40, 18, RAYWHITE);
+	int	hud_pos_x = (SCREEN_WIDTH - 200) + 15;
+	int	hud_pos_y = 15;
+	DrawText(TextFormat("Game State: %s", GetGameState(state)), hud_pos_x, hud_pos_y, 18, RAYWHITE);
+	DrawText(TextFormat("Player Count: %d", player_count), hud_pos_x, hud_pos_y + 40, 18, RAYWHITE);
 }
 
 static void	DrawEndGame(t_ipc *ipc, Color *winner_team_color)
@@ -135,8 +118,7 @@ int	main(int argc, char **argv)
 		}
 
 		Color	team_color;
-		DrawBoard(&ipc, team_count, &team_color);
-		DrawHud(&ipc);
+		DrawGame(&ipc, team_count, &team_color);
 
 		SemLock(&ipc);
 		e_game_state	current_state = ipc.board->state;

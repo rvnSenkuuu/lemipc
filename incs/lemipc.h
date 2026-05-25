@@ -20,8 +20,8 @@
 #define IPC_KEY_PATH "./lemipc_key"
 #define IPC_KEY_ID 0x4242
 
-#define BOARD_WIDTH 5
-#define BOARD_HEIGHT 5
+#define BOARD_WIDTH 80
+#define BOARD_HEIGHT 80
 #define BOARD_SIZE BOARD_WIDTH * BOARD_HEIGHT
 #define EMPTY_SLOT 0
 
@@ -88,7 +88,6 @@ int	init_ipc(t_ipc *ipc);
 void	sem_lock(t_ipc *ipc);
 void	sem_unlock(t_ipc *ipc);
 
-void	remove_player_from_board(t_board *board, t_player *player);
 void	move_player(t_board *board, t_player *player, t_player *target);
 void	random_move(t_board *board, t_player *player);
 void	find_nearest_target(t_board *board, t_player *player, t_player *target);

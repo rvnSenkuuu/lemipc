@@ -25,14 +25,6 @@ int	put_player_on_board(t_ipc *ipc, t_player *player)
 	return 0;
 }
 
-void	remove_player_from_board(t_board *board, t_player *player)
-{
-	player->alive = false;
-	if (board->map[player->pos_x + player->pos_y * BOARD_WIDTH] == player->team_id)
-		board->map[player->pos_x + player->pos_y * BOARD_WIDTH] = EMPTY_SLOT;
-	board->player_count--;
-}
-
 int	check_player_around(t_board *board, t_player *player)
 {
 	int	cells[9];
