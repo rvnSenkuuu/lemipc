@@ -74,3 +74,8 @@ inline bool	is_empty_cell(t_board *board, int x, int y)
 {
 	return board->map[x + y * BOARD_WIDTH] == EMPTY_SLOT;
 }
+
+inline bool	check_map_bound(int x, int y)
+{
+	return x < 0 || x >= BOARD_WIDTH || y < 0 || y >= BOARD_HEIGHT;
+}

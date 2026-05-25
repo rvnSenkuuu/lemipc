@@ -27,27 +27,21 @@ int	put_player_on_board(t_ipc *ipc, t_player *player)
 
 int	check_player_around(t_board *board, t_player *player)
 {
-	int	cells[9];
+	int	cells[9] = {0};
 	int	count = 0;
 	for (int x = player->pos_x - 1; x <= player->pos_x + 1; x++) {
 		for (int y = player->pos_y - 1; y <= player->pos_y + 1; y++) {
-			if (x == player->pos_x && y == player->pos_y)
-				continue;
-			if (x < 0 || x >= BOARD_WIDTH || y < 0 || y >= BOARD_HEIGHT)
+			if ((x == player->pos_x && y == player->pos_y) || check_map_bound(x, y))
 				continue;
 			int	team_id = board->map[x + y * BOARD_WIDTH];
-			if (team_id > EMPTY_SLOT && team_id != player->team_id)
+			if (team_id > EMPTY_SLOT && team_id != player->team_id) {
+				for (int i = 0; i < count; i++)
+					if (cells[i] == team_id)
+						return 1;
 				cells[count++] = team_id;
+			}
 		}
 	}
-
-	for (int i = 0; i < count; i++) {
-		for (int j = i + 1; j < count; j++) {
-			if (cells[i] == cells[j])
-				return 1;
-		}
-	}
-
 	return 0;
 }
 
@@ -72,7 +66,7 @@ void	find_nearest_target(t_board *board, t_player *player, t_player *target)
 
 void	update_player_pos(t_board *board, t_player *player, int new_x, int new_y)
 {
-	if (new_x < 0 || new_x >= BOARD_WIDTH || new_y < 0 || new_y >= BOARD_HEIGHT || board->map[new_x + new_y * BOARD_WIDTH] != EMPTY_SLOT)
+	if (check_map_bound(new_x, new_y) || !is_empty_cell(board, new_x, new_y))
 		return;
 	board->map[player->pos_x + player->pos_y * BOARD_WIDTH] = EMPTY_SLOT;
 	board->map[new_x + new_y * BOARD_WIDTH] = player->team_id;
@@ -129,7 +123,7 @@ void	move_player(t_board *board, t_player *player, t_player *target)
 		int	dx = directions[i][__X_POS];
 		int	dy = directions[i][__Y_POS];
 
-		if (dx < 0 || dx >= BOARD_WIDTH || dy < 0 || dy >= BOARD_HEIGHT || !is_empty_cell(board, dx, dy))
+		if (check_map_bound(dx, dy)|| !is_empty_cell(board, dx, dy))
 			continue;
 
 		int	current_dist = GET_DIST(dx, dy, target->pos_x, target->pos_y);
