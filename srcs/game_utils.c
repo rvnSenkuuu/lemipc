@@ -1,7 +1,7 @@
 #include "libft.h"
 #include "lemipc.h"
 
-static int	find_team_index(const t_team_info *teams, const size_t team_count, const int player_id)
+static int	search_team_index(const t_team_info *teams, const size_t team_count, const int player_id)
 {
 	for (size_t i = 0; i < team_count; i++) {
 		if (teams[i].id == player_id)
@@ -21,7 +21,7 @@ static void	get_team_and_player_count(t_board *board, size_t *team_count, size_t
 		if (player_id == EMPTY_SLOT)
 			continue;
 
-		int	team_index = find_team_index(teams, team_nb, player_id);
+		int	team_index = search_team_index(teams, team_nb, player_id);
 		if (team_index == -1) {
 			t_team_info	*tmp = realloc(teams, sizeof(*teams) * (team_nb + 1));
 			if (!tmp) {

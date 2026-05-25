@@ -24,7 +24,6 @@
 #define BOARD_HEIGHT 55
 #define BOARD_SIZE BOARD_WIDTH * BOARD_HEIGHT
 #define EMPTY_SLOT 0
-#define MIN_PLAYER 10
 
 #define __X_POS 0
 #define __Y_POS 1

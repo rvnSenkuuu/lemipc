@@ -1,14 +1,13 @@
 #include "libft.h"
 #include "lemipc.h"
 
-static void wait_for_players(t_ipc *ipc)
+static void wait_for_players(t_ipc *ipc, int player_count)
 {
     while (1) {
 		sem_lock(ipc);
-		if (ipc->board->player_count >= MIN_PLAYER || ipc->board->state != GAME_WAITING)
+		if (ipc->board->player_count >= player_count || ipc->board->state != GAME_WAITING)
 			break;
 		sem_unlock(ipc);
-		ft_dprintf(STDOUT_FILENO, "Waiting for player...\n");
 		sleep(1);
     }
 	if (ipc->board->state == GAME_RUNNING || ipc->board->state == GAME_WAITING)
@@ -29,16 +28,6 @@ static void	leave_game(t_ipc *ipc, t_player *player)
 	sem_unlock(ipc);
 }
 
-void	display_map(const int *map)
-{
-	ft_dprintf(STDOUT_FILENO, "\033[H\033[2J"); //clear screen
-	for (size_t i = 0; i < BOARD_SIZE; i++) {
-		ft_printf("%d ", map[i]);
-		if ((i + 1) % BOARD_WIDTH == 0)
-			ft_printf("\n");
-	}
-}
-
 static void	start_game(t_ipc *ipc, t_player *player)
 {
 	while (1) {
@@ -50,7 +39,7 @@ static void	start_game(t_ipc *ipc, t_player *player)
 			break;
 		}
 		
-		t_msg	msg;
+		t_msg	msg = {0};
 		t_player	target = {
 			.alive = false,
 			.pos_x = -1,
@@ -63,46 +52,53 @@ static void	start_game(t_ipc *ipc, t_player *player)
 		} else {
 			find_nearest_target(ipc->board, player, &target);
 		}
-		if (0)
-			display_map(ipc->board->map);
 		move_player(ipc->board, player, &target);
 		sem_unlock(ipc);
-		sleep(1);
-		// usleep(500000 / (1 * ipc->board->player_count));
+		usleep(500000 / (1 * ipc->board->player_count));
 		send_target_to_team(ipc, &target, player->team_id);
 	}
 }
 
+static bool	check_args(int argc, int team_id, int player_count)
+{
+	if (argc < 3) { 
+		ft_dprintf(STDERR_FILENO, "Usage: %s <team_id> <player_count>\n", PROGRAM_NAME);
+		return false;
+	}
+	if (team_id <= 0) {
+		ft_dprintf(STDERR_FILENO, "%s: Invalid team_id '%s'\n", PROGRAM_NAME, team_id);
+		return false;
+	}
+	if (player_count < 3) {
+		ft_dprintf(STDERR_FILENO, "%s: Required minimum 3 player to put on the board\n", PROGRAM_NAME);
+		return false;
+	}
+	return true;
+}
+
 int	main(int argc, char **argv)
 {
-	if (argc < 2) { 
-		ft_dprintf(STDERR_FILENO, "Usage: %s <team_id>\n", PROGRAM_NAME);
-		return 1;
-	}
-
 	t_player	player = {
 		.alive = true, 
 		.pos_x = 0,
 		.pos_y = 0, 
 		.team_id = ft_atoi(argv[1])};
-	if (player.team_id <= 0) { 
-		ft_dprintf(STDERR_FILENO, "%s: Invalid team_id '%s'\n", PROGRAM_NAME, argv[1]);
+	int	player_count = ft_atoi(argv[2]);
+	if (!check_args(argc, player.team_id, player_count))
 		return 1;
-	}
 
-	t_ipc	ipc;
+	t_ipc	ipc = {0};
 	if (init_ipc(&ipc)) {
 		ft_dprintf(STDERR_FILENO, "%s: Failed to init ipc\n", PROGRAM_NAME);
 		return 1;
 	}
-
 	if (put_player_on_board(&ipc, &player)) {
 		ft_dprintf(STDERR_FILENO, "%s: Could not put player on the board\n", PROGRAM_NAME);
 		return 1;
 	}
 
 	srand(time(NULL) ^ getpid());
-	wait_for_players(&ipc);
+	wait_for_players(&ipc, player_count);
 	start_game(&ipc, &player);
 	clean_ipc(&ipc);
 	return 0;

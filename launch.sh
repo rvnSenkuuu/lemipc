@@ -3,7 +3,7 @@ set -e
 
 BOARD_HEIGHT=45
 BOARD_WIDTH=50
-MIN_PLAYER=4
+MIN_PLAYER=3
 MAX_PLAYERS=$((BOARD_HEIGHT * BOARD_WIDTH))
 
 read -rp "Nombre de joueurs : " NUM_PLAYERS
@@ -19,7 +19,7 @@ PIDS=()
 
 TEAM_ID=1
 if [[ -x "./lemipc" ]]; then
-  ./lemipc "$TEAM_ID" &
+  ./lemipc "$TEAM_ID" "$NUM_PLAYERS" &
   PID_CREATOR=$!
   echo "Créateur (Joueur 1, Équipe $TEAM_ID, PID $PID_CREATOR) lancé. Initialisation de la mémoire..."
 else
@@ -36,7 +36,7 @@ for i in $(seq 2 "$NUM_PLAYERS"); do
   TEAM_ID=$(( (i-1) % NUM_TEAMS + 1 ))
   
   if [[ -x "./lemipc" ]]; then
-    ./lemipc "$TEAM_ID" &
+    ./lemipc "$TEAM_ID" "$NUM_PLAYERS" &
     pid=$!
     kill -STOP "$pid"
     PIDS+=( "$pid" )
