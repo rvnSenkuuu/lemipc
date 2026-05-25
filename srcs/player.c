@@ -25,6 +25,14 @@ int	put_player_on_board(t_ipc *ipc, t_player *player)
 	return 0;
 }
 
+static inline bool	search_team_index(int cells[9], int count, int search_id)
+{
+	for (int i = 0; i < count; i++)
+		if (cells[i] == search_id)
+			return true;
+	return false;
+}
+
 int	check_player_around(t_board *board, t_player *player)
 {
 	int	cells[9] = {0};
@@ -35,9 +43,8 @@ int	check_player_around(t_board *board, t_player *player)
 				continue;
 			int	team_id = board->map[x + y * BOARD_WIDTH];
 			if (team_id > EMPTY_SLOT && team_id != player->team_id) {
-				for (int i = 0; i < count; i++)
-					if (cells[i] == team_id)
-						return 1;
+				if (search_team_index(cells, count, team_id))
+					return 1;
 				cells[count++] = team_id;
 			}
 		}

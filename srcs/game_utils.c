@@ -1,12 +1,11 @@
 #include "libft.h"
 #include "lemipc.h"
 
-static int	search_team_index(const t_team_info *teams, const size_t team_count, const int player_id)
+static inline int	search_team_index(const t_team_info *teams, const size_t team_count, const int player_id)
 {
-	for (size_t i = 0; i < team_count; i++) {
+	for (size_t i = 0; i < team_count; i++)
 		if (teams[i].id == player_id)
 			return i;
-	}
 	return -1;
 }
 
