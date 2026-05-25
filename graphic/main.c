@@ -98,17 +98,24 @@ static void	DrawEndGame(t_ipc *ipc, Color *winner_team_color)
 	EndDrawing();
 }
 
-int	main(int argc, char **argv)
+static bool	CheckArgs(int argc, int team_count)
 {
 	if (argc < 2) {
 		fprintf(stderr, "%s: Usage: ./glemipc <team_count>", PROGRAM_NAME);
-		return 1;
+		return false;
 	}
-	int	team_count = ft_atoi(argv[1]);
 	if (team_count < 2) {
 		fprintf(stderr, "%s: Minimum 2 team is required\n", PROGRAM_NAME);
-		return 1;
+		return false;
 	}
+	return true;
+}
+
+int	main(int argc, char **argv)
+{
+	int	team_count = ft_atoi(argv[1]);
+	if (!CheckArgs(argc, team_count))
+		return 1;
 
 	t_ipc	ipc = {0};
 	if (InitIpc(&ipc))
