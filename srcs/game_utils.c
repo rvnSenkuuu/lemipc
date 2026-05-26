@@ -12,11 +12,9 @@ static inline int	search_team_index(const t_team_info *teams, const size_t team_
 void	get_team_and_player_count(t_ipc *ipc, size_t *team_count, size_t *killer_team_count)
 {
 	size_t	team_nb = 0;
+	const int	*map = ipc->board->map;
 	t_team_info	*teams = NULL;
 	
-	sem_lock(ipc);
-	const int	*map = ipc->board->map;
-	sem_unlock(ipc);
 	for (size_t i = 0; i < BOARD_SIZE; i++) {
 		int	player_id = map[i];
 		if (player_id == EMPTY_SLOT)

@@ -26,6 +26,7 @@ static const char	*GetGameState(e_game_state state)
 
 static void	DrawGame(t_ipc *ipc, int team_count, Color *team_color)
 {
+	int	player_count = 0;
 	int	board_width = SCREEN_WIDTH - 200;
 	int	board_height = SCREEN_HEIGHT;
 	float	cell_width = (float)board_width / BOARD_WIDTH;
@@ -34,7 +35,6 @@ static void	DrawGame(t_ipc *ipc, int team_count, Color *team_color)
 
 	SemLock(ipc);
 	e_game_state	state = ipc->board->state;
-	int	player_count = ipc->board->player_count;
 	const int	*map = ipc->board->map;
 	SemUnlock(ipc);
 
@@ -45,6 +45,8 @@ static void	DrawGame(t_ipc *ipc, int team_count, Color *team_color)
 			int	cell = map[x + y * BOARD_WIDTH];
 			if (cell == EMPTY_SLOT)
 				continue;
+
+			player_count++;
 			Rectangle	player = {
 				.x = x * cell_width,
 				.y = y * cell_height,

@@ -17,7 +17,6 @@ static void wait_for_players(t_ipc *ipc, int player_count)
 
 static void	leave_game(t_ipc *ipc, t_player *player)
 {
-	sem_lock(ipc);
 	e_game_state	state = ipc->board->state;
 	if (state == ONE_TEAM_REMAINING && ipc->board->winner_team == 0)
 		ipc->board->winner_team = find_winner_team(ipc->board);
@@ -26,7 +25,6 @@ static void	leave_game(t_ipc *ipc, t_player *player)
 	if (ipc->board->map[player->pos_x + player->pos_y * BOARD_WIDTH] == player->team_id)
 		ipc->board->map[player->pos_x + player->pos_y * BOARD_WIDTH] = EMPTY_SLOT;
 	ipc->board->player_count--;
-	sem_unlock(ipc);
 }
 
 static void	start_game(t_ipc *ipc, t_player *player)
@@ -48,8 +46,8 @@ static void	start_game(t_ipc *ipc, t_player *player)
 
 		ipc->board->state = update_game_state(ipc);
 		if (ipc->board->state != GAME_RUNNING) {
-			sem_unlock(ipc);
 			leave_game(ipc, player);
+			sem_unlock(ipc);
 			break;
 		}
 
