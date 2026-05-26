@@ -20,8 +20,8 @@
 #define IPC_KEY_PATH "./lemipc_key"
 #define IPC_KEY_ID 0x4242
 
-#define BOARD_WIDTH 80
-#define BOARD_HEIGHT 80
+#define BOARD_WIDTH 10
+#define BOARD_HEIGHT 10
 #define BOARD_SIZE BOARD_WIDTH * BOARD_HEIGHT
 #define EMPTY_SLOT 0
 
@@ -97,10 +97,10 @@ int	check_player_around(t_board *board, t_player *player);
 void	send_target_to_team(t_ipc *ipc, t_player *target, int player_team_id);
 int	receive_target_from_team(t_ipc *ipc, t_msg *msg, int team_id);
 
-void	get_team_and_player_count(t_board *board, size_t *team_count, size_t *killer_team_count);
+void	get_team_and_player_count(t_ipc *ipc, size_t *team_count, size_t *killer_team_count);
 bool	is_empty_cell(t_board *board, int x, int y);
 bool	check_map_bound(int x, int y);
 int find_winner_team(t_board *board);
-e_game_state	update_game_state(t_board *board);
+e_game_state	update_game_state(t_ipc *ipc);
 
 #endif

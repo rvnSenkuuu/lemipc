@@ -46,7 +46,7 @@ static void	start_game(t_ipc *ipc, t_player *player)
 			break;
 		}
 
-		ipc->board->state = update_game_state(ipc->board);
+		ipc->board->state = update_game_state(ipc);
 		if (ipc->board->state != GAME_RUNNING) {
 			sem_unlock(ipc);
 			leave_game(ipc, player);

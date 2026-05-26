@@ -9,12 +9,14 @@ static inline int	search_team_index(const t_team_info *teams, const size_t team_
 	return -1;
 }
 
-void	get_team_and_player_count(t_board *board, size_t *team_count, size_t *killer_team_count)
+void	get_team_and_player_count(t_ipc *ipc, size_t *team_count, size_t *killer_team_count)
 {
 	size_t	team_nb = 0;
-	const int	*map = board->map;
 	t_team_info	*teams = NULL;
-
+	
+	sem_lock(ipc);
+	const int	*map = ipc->board->map;
+	sem_unlock(ipc);
 	for (size_t i = 0; i < BOARD_SIZE; i++) {
 		int	player_id = map[i];
 		if (player_id == EMPTY_SLOT)
@@ -55,11 +57,11 @@ int find_winner_team(t_board *board)
     return -1;
 }
 
-e_game_state	update_game_state(t_board *board)
+e_game_state	update_game_state(t_ipc *ipc)
 {
 	size_t	team_count = 0;
 	size_t	killer_team_count = 0;
-	get_team_and_player_count(board, &team_count, &killer_team_count);
+	get_team_and_player_count(ipc, &team_count, &killer_team_count);
 
 	if (team_count == 1)
 		return ONE_TEAM_REMAINING;

@@ -53,7 +53,7 @@ static void	DrawGame(t_ipc *ipc, int team_count, Color *team_color)
 			float	hue = fmod((cell - 1) * slice, 360.0f);
 			Color player_color = ColorFromHSV(hue, 0.85f, 0.95f);
 			*team_color = player_color;
-			DrawRectangleRec(player, player_color);
+			DrawRectangleRounded(player, 0.2f, 0, player_color);
 		}
 	}
 
@@ -76,7 +76,12 @@ static void	DrawEndGame(t_ipc *ipc, Color *winner_team_color)
 		DrawText("The game is draw", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 20, RAYWHITE);
 	} else if (final_state == ONE_TEAM_REMAINING) {
 		DrawText(TextFormat("Team %d won !", winner), SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2, 20, RAYWHITE);
-		DrawRectangle(SCREEN_WIDTH / 2 - 70, SCREEN_HEIGHT / 2 + 50, 80, 80, *winner_team_color);
+		Rectangle	rec = {
+			.x = SCREEN_WIDTH / 2 - 70,
+			.y = SCREEN_HEIGHT / 2 + 50, 
+			.width = 80,
+			.height = 80};
+		DrawRectangleRounded(rec, 0.2f, 0, *winner_team_color);
 	}
 	EndDrawing();
 }
