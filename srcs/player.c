@@ -3,23 +3,31 @@
 int	put_player_on_board(t_ipc *ipc, t_player *player)
 {
 	sem_lock(ipc);
-	if (ipc->board->player_count == BOARD_SIZE) { 
+	if (ipc->board->player_count == BOARD_SIZE) {
 		sem_unlock(ipc);
 		return 1;
 	}
-	
-	for (size_t i = 0; i < BOARD_SIZE; i++) {
-		int	x = rand() % BOARD_WIDTH;
-		int	y = rand() % BOARD_HEIGHT;
 
-		if (is_empty_cell(ipc->board, x, y)) {
-			player->pos_x = x;
-			player->pos_y = y;
-			ipc->board->map[x + y * BOARD_WIDTH] = player->team_id;
-			break;
+	int	count = 0;
+	int	empty_cell[BOARD_SIZE][2];
+
+	for (int i = 0; i < BOARD_SIZE; i++) {
+		if (ipc->board->map[i] == EMPTY_CELL) {
+			empty_cell[count][__X_POS] = i % BOARD_WIDTH;
+			empty_cell[count][__Y_POS] = i / BOARD_WIDTH;
+			count++;
 		}
 	}
 
+	if (count == 0) {
+		sem_unlock(ipc);
+		return 1;
+	}
+
+	int	cell = rand() % count;
+	player->pos_x = empty_cell[cell][__X_POS];
+	player->pos_y = empty_cell[cell][__Y_POS];
+	ipc->board->map[player->pos_x + player->pos_y * BOARD_WIDTH] = player->team_id;
 	ipc->board->player_count++;
 	sem_unlock(ipc);
 	return 0;
@@ -42,7 +50,7 @@ int	check_player_around(t_board *board, t_player *player)
 			if ((x == player->pos_x && y == player->pos_y) || check_map_bound(x, y))
 				continue;
 			int	team_id = board->map[x + y * BOARD_WIDTH];
-			if (team_id > EMPTY_SLOT && team_id != player->team_id) {
+			if (team_id > EMPTY_CELL && team_id != player->team_id) {
 				if (search_team_index(cells, count, team_id))
 					return 1;
 				cells[count++] = team_id;
@@ -58,7 +66,7 @@ void	find_nearest_target(t_board *board, t_player *player, t_player *target)
 	for (int y = 0; y < BOARD_HEIGHT; y++) {
 		for (int x = 0; x < BOARD_WIDTH; x++) {
 			int	cell = board->map[x + y * BOARD_WIDTH];
-			if (cell == EMPTY_SLOT || cell == player->team_id)
+			if (cell == EMPTY_CELL || cell == player->team_id)
 				continue;
 			int	current_dist = GET_DIST(player->pos_x, player->pos_y, x, y);
 			if (current_dist < dist) {
@@ -75,7 +83,7 @@ void	update_player_pos(t_board *board, t_player *player, int new_x, int new_y)
 {
 	if (check_map_bound(new_x, new_y) || !is_empty_cell(board, new_x, new_y))
 		return;
-	board->map[player->pos_x + player->pos_y * BOARD_WIDTH] = EMPTY_SLOT;
+	board->map[player->pos_x + player->pos_y * BOARD_WIDTH] = EMPTY_CELL;
 	board->map[new_x + new_y * BOARD_WIDTH] = player->team_id;
 	player->pos_x = new_x;
 	player->pos_y = new_y;
