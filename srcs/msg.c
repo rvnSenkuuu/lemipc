@@ -3,6 +3,10 @@
 
 void	send_target_to_team(t_ipc *ipc, t_player *target, int player_team_id)
 {
+	t_msg	old = {0};
+	while (msgrcv(ipc->msgq_id, &old, sizeof(old) - sizeof(long), player_team_id, IPC_NOWAIT) != -1)
+		;
+
 	t_msg	msg = {0};
 	msg.team_id = player_team_id;
 	msg.target_x = target->pos_x;
