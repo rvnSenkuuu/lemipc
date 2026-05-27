@@ -8,7 +8,7 @@ static void wait_for_players(t_ipc *ipc, int player_count)
 		if (ipc->board->player_count >= player_count || ipc->board->state != GAME_WAITING)
 			break;
 		sem_unlock(ipc);
-		sleep(1);
+		usleep(100000);
     }
 	if (ipc->board->state == GAME_RUNNING || ipc->board->state == GAME_WAITING)
 		ipc->board->state = GAME_RUNNING;
@@ -23,7 +23,7 @@ static void	leave_game(t_ipc *ipc, t_player *player)
 
 	player->alive = false;
 	if (ipc->board->map[player->pos_x + player->pos_y * BOARD_WIDTH] == player->team_id)
-		ipc->board->map[player->pos_x + player->pos_y * BOARD_WIDTH] = EMPTY_SLOT;
+		ipc->board->map[player->pos_x + player->pos_y * BOARD_WIDTH] = EMPTY_CELL;
 	ipc->board->player_count--;
 }
 
@@ -78,7 +78,7 @@ static bool	check_args(int argc, int team_id, int player_count)
 		return false;
 	}
 	if (team_id <= 0) {
-		ft_dprintf(STDERR_FILENO, "%s: Invalid team_id '%s'\n", PROGRAM_NAME, team_id);
+		ft_dprintf(STDERR_FILENO, "%s: Invalid team_id '%d'\n", PROGRAM_NAME, team_id);
 		return false;
 	}
 	if (player_count < 3) {
@@ -90,6 +90,7 @@ static bool	check_args(int argc, int team_id, int player_count)
 
 int	main(int argc, char **argv)
 {
+	srand(time(NULL) ^ getpid());
 	t_player	player = {
 		.alive = true, 
 		.pos_x = 0,
@@ -109,7 +110,6 @@ int	main(int argc, char **argv)
 		return 1;
 	}
 
-	srand(time(NULL) ^ getpid());
 	wait_for_players(&ipc, player_count);
 	start_game(&ipc, &player);
 	clean_ipc(&ipc);

@@ -17,7 +17,7 @@ void	get_team_and_player_count(t_ipc *ipc, size_t *team_count, size_t *killer_te
 	
 	for (size_t i = 0; i < BOARD_SIZE; i++) {
 		int	player_id = map[i];
-		if (player_id == EMPTY_SLOT)
+		if (player_id == EMPTY_CELL)
 			continue;
 
 		int	team_index = search_team_index(teams, team_nb, player_id);
@@ -49,7 +49,7 @@ void	get_team_and_player_count(t_ipc *ipc, size_t *team_count, size_t *killer_te
 int find_winner_team(t_board *board)
 {
     for (size_t i = 0; i < BOARD_SIZE; i++) {
-        if (board->map[i] != EMPTY_SLOT)
+        if (board->map[i] != EMPTY_CELL)
             return board->map[i];
     }
     return -1;
@@ -71,7 +71,7 @@ e_game_state	update_game_state(t_ipc *ipc)
 
 inline bool	is_empty_cell(t_board *board, int x, int y)
 {
-	return board->map[x + y * BOARD_WIDTH] == EMPTY_SLOT;
+	return board->map[x + y * BOARD_WIDTH] == EMPTY_CELL;
 }
 
 inline bool	check_map_bound(int x, int y)

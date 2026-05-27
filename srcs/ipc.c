@@ -13,11 +13,9 @@ static void	create_key_path(const char *file)
 
 static int	init_shm(t_ipc *ipc, key_t key)
 {
-	size_t	shm_sz = sizeof(t_board);
-	
-	ipc->shm_id = shmget(key, shm_sz, IPC_CREAT | IPC_EXCL | 0644);
+	ipc->shm_id = shmget(key, sizeof(t_board), IPC_CREAT | IPC_EXCL | 0644);
 	if (ipc->shm_id < 0) {
-		ipc->shm_id = shmget(key, shm_sz, 0644);
+		ipc->shm_id = shmget(key, sizeof(t_board), 0644);
 		ipc->first_process = false;
 	}
 
@@ -124,6 +122,8 @@ int	init_ipc(t_ipc *ipc)
 		return 1;
 	}
 
+	sem_lock(ipc);
 	ipc->board->client_count++;
+	sem_unlock(ipc);
 	return 0;
 }
