@@ -43,7 +43,7 @@ static void	DrawGame(t_ipc *ipc, int team_count, Color *team_color)
 	for (int x = 0; x < BOARD_WIDTH; x++) {
 		for (int y = 0; y < BOARD_HEIGHT; y++) {
 			int	cell = map[x + y * BOARD_WIDTH];
-			if (cell == EMPTY_SLOT)
+			if (cell == EMPTY_CELL)
 				continue;
 
 			player_count++;
@@ -75,7 +75,7 @@ static void	DrawEndGame(t_ipc *ipc, Color *winner_team_color)
 	BeginDrawing();
 	ClearBackground(BLACK);
 	if (final_state == GAME_DRAW) {
-		DrawText("The game is draw", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 20, RAYWHITE);
+		DrawText("The game is draw", SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2, 20, RAYWHITE);
 	} else if (final_state == ONE_TEAM_REMAINING) {
 		DrawText(TextFormat("Team %d won !", winner), SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2, 20, RAYWHITE);
 		Rectangle	rec = {
