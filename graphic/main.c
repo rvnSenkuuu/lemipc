@@ -77,9 +77,9 @@ static void	DrawEndGame(t_ipc *ipc, Color *winner_team_color)
 	if (final_state == GAME_DRAW) {
 		DrawText("The game is draw", SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2, 20, RAYWHITE);
 	} else if (final_state == ONE_TEAM_REMAINING) {
-		DrawText(TextFormat("Team %d won !", winner), SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2, 20, RAYWHITE);
+		DrawText(TextFormat("Team %d won !", winner), SCREEN_WIDTH / 2 - 70, SCREEN_HEIGHT / 2, 20, RAYWHITE);
 		Rectangle	rec = {
-			.x = SCREEN_WIDTH / 2 - 70,
+			.x = SCREEN_WIDTH / 2 - 45,
 			.y = SCREEN_HEIGHT / 2 + 50, 
 			.width = 80,
 			.height = 80};
