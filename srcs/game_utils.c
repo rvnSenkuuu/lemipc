@@ -78,3 +78,10 @@ inline bool	check_map_bound(int x, int y)
 {
 	return x < 0 || x >= BOARD_WIDTH || y < 0 || y >= BOARD_HEIGHT;
 }
+
+void	swap(int *a, int *b)
+{
+	int	tmp = *a;
+	*a = *b;
+	*b = tmp;
+}

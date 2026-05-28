@@ -97,6 +97,7 @@ int	check_player_around(t_board *board, t_player *player);
 void	send_target_to_team(t_ipc *ipc, t_player *target, int player_team_id);
 int	receive_target_from_team(t_ipc *ipc, t_msg *msg, int team_id);
 
+void	swap(int *a, int *b);
 void	get_team_and_player_count(t_ipc *ipc, size_t *team_count, size_t *killer_team_count);
 bool	is_empty_cell(t_board *board, int x, int y);
 bool	check_map_bound(int x, int y);

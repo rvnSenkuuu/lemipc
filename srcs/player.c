@@ -91,33 +91,31 @@ void	update_player_pos(t_board *board, t_player *player, int new_x, int new_y)
 
 void	random_move(t_board *board, t_player *player)
 {
-	int	tried_dir[__dir_count] = {0};
-	for (int tries = 0; tries < __dir_count; tries++) {
+	int	dirs[__dir_count] = {UP, DOWN, LEFT, RIGHT};
+	for (int i = __dir_count - 1; i > 0; i--) {
+		int	j = rand() % (i + 1);
+		swap(&dirs[i], &dirs[j]);
+	}
+
+	for (int i = 0; i < __dir_count; i++) {
 		int	new_x = player->pos_x;
 		int	new_y = player->pos_y;
-		e_dir	dir = rand() % __dir_count;
-		
-		if (tried_dir[dir])
-			continue;
 
-		if (dir == UP)
+		if (dirs[i] == UP)
 			new_y--;
-		else if (dir == DOWN)
+		else if (dirs[i] == DOWN)
 			new_y++;
-		else if (dir == LEFT)
+		else if (dirs[i] == LEFT)
 			new_x--;
-		else if (dir == RIGHT)
+		else if (dirs[i] == RIGHT)
 			new_x++;
 		
-		if (is_empty_cell(board, new_x, new_y)) {
+		if (!check_map_bound(new_x, new_y) && is_empty_cell(board, new_x, new_y)) {
 			update_player_pos(board, player, new_x, new_y);
-			break;
+			return;
 		}
-
-		tried_dir[dir] = 1;
 	}
 }
-
 void	move_player(t_board *board, t_player *player, t_player *target)
 {
 	if (target->pos_x == -1) {
@@ -127,12 +125,20 @@ void	move_player(t_board *board, t_player *player, t_player *target)
 
 	int	new_x = -1;
 	int	new_y = -1;
-	int	distance = GET_DIST(player->pos_x, player->pos_y, target->pos_x, target->pos_y);
+	int	current_dist = GET_DIST(player->pos_x, player->pos_y, target->pos_x, target->pos_y);
+	int	best_dist = INT_MAX;
+
 	int	directions[4][2] = {
 		{player->pos_x, player->pos_y - 1},
 		{player->pos_x, player->pos_y + 1},
 		{player->pos_x + 1, player->pos_y},
 		{player->pos_x - 1, player->pos_y}};
+
+	for (int i = 3; i > 0; i--) {
+		int	j = rand() % (i + 1);
+		swap(&directions[i][__X_POS], &directions[j][__X_POS]);
+		swap(&directions[i][__Y_POS], &directions[j][__Y_POS]);
+	}
 
 	for (size_t i = 0; i < ARRAY_LEN(directions); i++) {
 		int	dx = directions[i][__X_POS];
@@ -141,16 +147,21 @@ void	move_player(t_board *board, t_player *player, t_player *target)
 		if (check_map_bound(dx, dy)|| !is_empty_cell(board, dx, dy))
 			continue;
 
-		int	current_dist = GET_DIST(dx, dy, target->pos_x, target->pos_y);
-		if (current_dist < distance) {
-			distance = current_dist;
+		int	dist = GET_DIST(dx, dy, target->pos_x, target->pos_y);
+		if (dist < current_dist) {
+			update_player_pos(board, player, dx, dy);
+			return;
+		}
+		if (dist < best_dist) {
+			best_dist = dist;
 			new_x = dx;
 			new_y = dy;
 		}
 	}
 
-	if (new_x != -1)
+	if (new_x != -1 && current_dist == best_dist) {
 		update_player_pos(board, player, new_x, new_y);
-	else
-		random_move(board, player);
+		return;
+	}
+	random_move(board, player);
 }
