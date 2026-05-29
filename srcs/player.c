@@ -79,6 +79,27 @@ void	find_nearest_target(t_board *board, t_player *player, t_player *target)
 	}
 }
 
+void	update_target(t_ipc *ipc, t_player *player, t_player *target)
+{
+	t_msg	msg = {0};
+	
+	if (!receive_target_from_team(ipc, &msg, player->team_id)) {
+		t_player	team_target = {
+			.pos_x   = msg.target_x,
+			.pos_y   = msg.target_y,
+			.team_id = msg.target_id};
+		if (is_valid_target(ipc->board, &team_target)) {
+			*target = team_target;
+			return;
+		}
+	}
+ 
+	target->pos_x   = -1;
+	target->pos_y   = -1;
+	target->team_id = -1;
+	find_nearest_target(ipc->board, player, target);
+}
+
 void	update_player_pos(t_board *board, t_player *player, int new_x, int new_y)
 {
 	if (check_map_bound(new_x, new_y) || !is_empty_cell(board, new_x, new_y))

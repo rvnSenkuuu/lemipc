@@ -29,6 +29,11 @@ static void	leave_game(t_ipc *ipc, t_player *player)
 
 static void	start_game(t_ipc *ipc, t_player *player)
 {
+	t_player	target = {
+			.alive = false,
+			.pos_x = -1,
+			.pos_y = -1,
+			.team_id = -1};
 	while (1) {
 		sem_lock(ipc);
 		e_game_state	current_state = ipc->board->state;
@@ -51,23 +56,15 @@ static void	start_game(t_ipc *ipc, t_player *player)
 			break;
 		}
 
-		t_msg	msg = {0};
-		t_player	target = {
-			.alive = false,
-			.pos_x = -1,
-			.pos_y = -1,
-			.team_id = -1};
-		if (!receive_target_from_team(ipc, &msg, player->team_id)) {
-			target.pos_x = msg.target_x;
-			target.pos_y = msg.target_y;
-			target.team_id = msg.target_id;
-		} else {
-			find_nearest_target(ipc->board, player, &target);
-		}
+		if (!is_valid_target(ipc->board, &target))
+			update_target(ipc, player, &target);
+
 		move_player(ipc->board, player, &target);
 		sem_unlock(ipc);
 		usleep(500000);
-		send_target_to_team(ipc, &target, player->team_id);
+		if (target.pos_x != -1)
+			send_target_to_team(ipc, &target, player->team_id);
+
 	}
 }
 

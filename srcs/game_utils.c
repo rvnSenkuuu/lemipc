@@ -79,6 +79,13 @@ inline bool	check_map_bound(int x, int y)
 	return x < 0 || x >= BOARD_WIDTH || y < 0 || y >= BOARD_HEIGHT;
 }
 
+inline bool	is_valid_target(t_board *board, t_player *target)
+{
+	if (target->pos_x == -1 || check_map_bound(target->pos_x, target->pos_y))
+		return false;
+	return board->map[target->pos_x + target->pos_y * BOARD_WIDTH] == target->team_id;
+}
+
 void	swap(int *a, int *b)
 {
 	int	tmp = *a;
