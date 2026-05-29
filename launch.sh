@@ -71,7 +71,7 @@ else
   exit 1
 fi
 
-sleep 1.5
+sleep 1
 
 for pid in "${PIDS[@]}"; do
   kill -CONT "$pid" 2>/dev/null || true

@@ -7,15 +7,17 @@ RM	= rm -rf
 
 INCS_DIR = ./incs/
 
-SRCS_COMMON = srcs/ipc.c \
+SRCS_COMMON = srcs/ipc.c        \
 			  srcs/board_lock.c \
-			  srcs/player.c \
-			  srcs/msg.c \
+			  srcs/player.c     \
+			  srcs/msg.c        \
 			  srcs/game_utils.c \
 
 SRCS =  srcs/main.c
 
-SRCS_GRAPHIC = graphic/main.c
+SRCS_GRAPHIC = graphic/main.c           \
+			   graphic/text_mode.c      \
+			   graphic/graphical_mode.c \
 
 OBJS_DIR = .objs/
 OBJS_COMMON = $(patsubst %.c, $(OBJS_DIR)%.o, $(SRCS_COMMON))

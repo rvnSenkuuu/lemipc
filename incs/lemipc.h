@@ -90,6 +90,7 @@ void	sem_unlock(t_ipc *ipc);
 
 void	move_player(t_board *board, t_player *player, t_player *target);
 void	random_move(t_board *board, t_player *player);
+void	update_target(t_ipc *ipc, t_player *player, t_player *target);
 void	find_nearest_target(t_board *board, t_player *player, t_player *target);
 int	put_player_on_board(t_ipc *ipc, t_player *player);
 int	check_player_around(t_board *board, t_player *player);
@@ -99,6 +100,7 @@ int	receive_target_from_team(t_ipc *ipc, t_msg *msg, int team_id);
 
 void	swap(int *a, int *b);
 void	get_team_and_player_count(t_ipc *ipc, size_t *team_count, size_t *killer_team_count);
+bool	is_valid_target(t_board *board, t_player *target);
 bool	is_empty_cell(t_board *board, int x, int y);
 bool	check_map_bound(int x, int y);
 int find_winner_team(t_board *board);
