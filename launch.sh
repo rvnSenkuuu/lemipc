@@ -19,6 +19,15 @@ read -rp "Nombre d'équipes : " NUM_TEAMS
 if ! [[ "$NUM_TEAMS" =~ ^[0-9]+$ ]]; then echo "Entrée invalide"; exit 1; fi
 if (( NUM_TEAMS < 1 || NUM_TEAMS > NUM_PLAYERS )); then echo "Nombre d'équipes invalide"; exit 1; fi
 
+read -rp "Mode texte (y/n) [défaut: y] ? " yn
+if [[ "$yn" == "n" || "$yn" == "N" ]]; then
+  TEXT_MODE=""
+  echo "Mode graphique activé."
+else
+  TEXT_MODE="--text"
+  echo "Mode texte activé."
+fi
+
 PIDS=()
 
 TEAM_ID=1
@@ -53,7 +62,7 @@ done
 sleep 0.2
 
 if [[ -x "./glemipc" ]]; then
-  ./glemipc $NUM_TEAMS &
+  ./glemipc $NUM_TEAMS $TEXT_MODE &
   VISU_PID=$!
   echo "Visualiseur lancé (PID $VISU_PID). Préparation de l'affichage..."
 else
