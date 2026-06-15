@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -e
 
+ipcs -m | awk 'NR>3{print $2}' | xargs -I{} ipcrm -m {} 2>/dev/null
+ipcs -s | awk 'NR>3{print $2}' | xargs -I{} ipcrm -s {} 2>/dev/null
+ipcs -q | awk 'NR>3{print $2}' | xargs -I{} ipcrm -q {} 2>/dev/null
+
 HEADER_FILE="incs/lemipc.h"
 
 BOARD_WIDTH=$(grep -E "^#define[[:space:]]+BOARD_WIDTH[[:space:]]+[0-9]+" "$HEADER_FILE" | awk '{print $3}')
