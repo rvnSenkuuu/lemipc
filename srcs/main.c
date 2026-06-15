@@ -6,13 +6,18 @@ static volatile sig_atomic_t	sig_running = 1;
 
 static void wait_for_players(t_ipc *ipc, int player_count)
 {
-    while (1) {
+    while (sig_running) {
 		sem_lock(ipc);
 		if (ipc->board->player_count >= player_count || ipc->board->state != GAME_WAITING)
 			break;
 		sem_unlock(ipc);
 		usleep(100000);
     }
+	if (!sig_running) {
+		sem_unlock(ipc);
+		clean_ipc(ipc);
+		exit(sig_running);
+	}
 	if (ipc->board->state == GAME_RUNNING || ipc->board->state == GAME_WAITING)
 		ipc->board->state = GAME_RUNNING;
 	sem_unlock(ipc);
@@ -44,7 +49,6 @@ static void	start_game(t_ipc *ipc, t_player *player)
 			.pos_y = -1,
 			.team_id = -1};
 
-	signal(SIGINT, handle_sigint);
 	while (sig_running) {
 		sem_lock(ipc);
 		e_game_state	current_state = ipc->board->state;
@@ -117,6 +121,7 @@ int	main(int argc, char **argv)
 		return 1;
 	}
 
+	signal(SIGINT, handle_sigint);
 	wait_for_players(&ipc, player_count);
 	start_game(&ipc, &player);
 	clean_ipc(&ipc);
