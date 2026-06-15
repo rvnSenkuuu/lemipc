@@ -6,10 +6,7 @@
 #define SCREEN_HEIGHT 600
 #define SCREEN_TITLE "Lemipc"
 
-#define SemLock sem_lock
-#define SemUnlock sem_unlock
-
-const char	*GetGameState(e_game_state state)
+const char	*get_game_state(e_game_state state)
 {
 	if (state == GAME_RUNNING)
 		return "Running";
@@ -21,7 +18,7 @@ const char	*GetGameState(e_game_state state)
 		return "Finished";
 }
 
-static void	DrawGame(t_ipc *ipc, int team_count, Color *team_color)
+static void	draw_game(t_ipc *ipc, int team_count, Color *team_color)
 {
 	int	player_count = 0;
 	int	board_width = SCREEN_WIDTH - 200;
@@ -30,10 +27,10 @@ static void	DrawGame(t_ipc *ipc, int team_count, Color *team_color)
 	float	cell_height = (float)board_height / BOARD_HEIGHT;
 	float	slice = 360.0f / team_count;
 
-	SemLock(ipc);
+	sem_lock(ipc);
 	e_game_state	state = ipc->board->state;
 	const int	*map = ipc->board->map;
-	SemUnlock(ipc);
+	sem_unlock(ipc);
 
     ClearBackground(BLACK);
 	DrawRectangle(0, 0, board_width, board_height, GetColor(0x181818FF));
@@ -58,16 +55,16 @@ static void	DrawGame(t_ipc *ipc, int team_count, Color *team_color)
 
 	int	hud_pos_x = (SCREEN_WIDTH - 200) + 15;
 	int	hud_pos_y = 15;
-	DrawText(TextFormat("Game State: %s", GetGameState(state)), hud_pos_x, hud_pos_y, 18, RAYWHITE);
+	DrawText(TextFormat("Game State: %s", get_game_state(state)), hud_pos_x, hud_pos_y, 18, RAYWHITE);
 	DrawText(TextFormat("Player Count: %d", player_count), hud_pos_x, hud_pos_y + 40, 18, RAYWHITE);
 }
 
-static void	DrawEndGame(t_ipc *ipc, Color *winner_team_color)
+static void	draw_end_game(t_ipc *ipc, Color *winner_team_color)
 {
-	SemLock(ipc);
+	sem_lock(ipc);
 	e_game_state	final_state = ipc->board->state;
 	int	winner = ipc->board->winner_team;
-	SemUnlock(ipc);
+	sem_unlock(ipc);
 
 	BeginDrawing();
 	ClearBackground(BLACK);
@@ -101,18 +98,18 @@ void	GraphicalMode(t_ipc *ipc, int team_count)
 		}
 
 		Color	team_color;
-		DrawGame(ipc, team_count, &team_color);
+		draw_game(ipc, team_count, &team_color);
 
-		SemLock(ipc);
+		sem_lock(ipc);
 		e_game_state	current_state = ipc->board->state;
 		if (current_state == GAME_DRAW || current_state == ONE_TEAM_REMAINING) {
-			SemUnlock(ipc);
+			sem_unlock(ipc);
 			EndDrawing();
-			DrawEndGame(ipc, &team_color);
+			draw_end_game(ipc, &team_color);
 			WaitTime(3.0);
 			break;
 		}
-		SemUnlock(ipc);
+		sem_unlock(ipc);
 		EndDrawing();
 	}
 	CloseWindow();

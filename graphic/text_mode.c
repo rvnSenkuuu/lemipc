@@ -2,72 +2,123 @@
 #include "libft.h"
 #include "lemipc.h"
 
-#define FtPrintf ft_printf
-#define SemLock sem_lock
-#define SemUnlock sem_unlock
-
 static volatile sig_atomic_t	sig_running = 1;
 
-const char	*GetGameState(e_game_state state);
+const char	*get_game_state(e_game_state state);
 
-static void	PrintCell(int cell)
+static char	*safe_strjoin(char *s1, char *s2)
 {
-	FtPrintf("[");
-	if (cell == EMPTY_CELL)
-		FtPrintf("  ");
-	else if (cell >= 10)
-		FtPrintf("%d", cell);
-	else
-		FtPrintf(" %d", cell);
-	FtPrintf("]");
+	size_t	s1_len = ft_strlen(s1);
+	size_t	s2_len = ft_strlen(s2);
+	char	*output = ft_calloc((s1_len + s2_len) + 1, sizeof(char));
+	if (!output)
+		return (NULL);
+	for (size_t i = 0; i < s1_len; i++)
+		output[i] = s1[i];
+	for (size_t i = 0; i < s2_len; i++, s1_len++)
+		output[s1_len] = s2[i];
+	free(s1);
+	return output;
 }
 
-static void	DisplayGame(t_ipc *ipc)
+static void	print_cell(int cell, char **buffer)
 {
+	char	*tmp = NULL;
+	
+	*buffer = safe_strjoin(*buffer, "[");
+	if (cell == EMPTY_CELL) {
+		*buffer = safe_strjoin(*buffer, "  ");
+	} else if (cell >= 10) {
+		tmp = ft_itoa(cell);
+		*buffer = safe_strjoin(*buffer, tmp);
+	} else {
+		*buffer = safe_strjoin(*buffer, " ");
+		tmp = ft_itoa(cell);
+		*buffer = safe_strjoin(*buffer, tmp);
+	}
+	*buffer = safe_strjoin(*buffer, "]");
+	
+	free(tmp);
+	tmp = NULL;
+}
+
+static void	display_game(t_ipc *ipc)
+{
+	char	*buffer = NULL;
+	char	*tmp = NULL;
 	int	player_count = 0;
 
-	SemLock(ipc);
+	sem_lock(ipc);
 	e_game_state	state = ipc->board->state;
 	const int	*map = ipc->board->map;
-	SemUnlock(ipc);
+	sem_unlock(ipc);
 
-	FtPrintf("\033[H\033[2J");
-	FtPrintf("========================================\n");
-	FtPrintf("              LEMIPC GAME               \n");
-	FtPrintf("========================================\n\n");
+	char	*header = "\033[H\033[2J"
+	"========================================\n"
+	"              LEMIPC GAME               \n"
+	"========================================\n\n";
+
+	buffer = safe_strjoin(buffer, header);
 
 	for (size_t y = 0; y < BOARD_HEIGHT; y++) {
 		for (size_t x = 0; x < BOARD_WIDTH; x++) {
 			int	cell = map[x + y * BOARD_WIDTH];
 			if (cell != EMPTY_CELL)
 				player_count++;
-			PrintCell(cell);
+			print_cell(cell, &buffer);
 		}
-		FtPrintf("\n");
+		buffer = safe_strjoin(buffer, "\n");
 	}
 
-	FtPrintf("\n----------------------------------------\n");
-	FtPrintf("Game State: %s\n", GetGameState(state));
-	FtPrintf("Player Count: %d\n", player_count);
+	buffer = safe_strjoin(buffer, "\n----------------------------------------\n");
+	buffer = safe_strjoin(buffer, "Game State: ");
+	buffer = safe_strjoin(buffer, (char *)get_game_state(state));
+	buffer = safe_strjoin(buffer, "\n");
+	buffer = safe_strjoin(buffer, "Player Count: ");
+	tmp = ft_itoa(player_count);
+	buffer = safe_strjoin(buffer, tmp);
+	buffer = safe_strjoin(buffer, "\n");
+
+	write(STDOUT_FILENO, buffer, ft_strlen(buffer));
+	
+	free(buffer);
+	free(tmp);
+	buffer = NULL;
+	tmp = NULL;
 }
 
-static void	DisplayEndGame(t_ipc *ipc)
+static void	display_end_game(t_ipc *ipc)
 {
-	SemLock(ipc);
+	sem_lock(ipc);
 	e_game_state	final_state = ipc->board->state;
 	int	winner = ipc->board->winner_team;
-	SemUnlock(ipc);
+	sem_unlock(ipc);
 
-	FtPrintf("\033[H\033[2J");
-	FtPrintf("========================================\n");
-	FtPrintf("             GAME  OVER                 \n");
-	FtPrintf("========================================\n");
+	char	*tmp = NULL;
+	char	*buffer = NULL;
+	char	*end_header = "\033[H\033[2J"
+	"========================================\n"
+	"             GAME  OVER                 \n"
+	"========================================\n";
+	
+	buffer = safe_strjoin(buffer, end_header);
 
-	if (final_state == GAME_DRAW)
-		FtPrintf("The Game ended in a Draw !\n");
-	else if (final_state == ONE_TEAM_REMAINING)
-		FtPrintf("Team %d won the game\n", winner);
-	FtPrintf("Exiting in 5 seconds...\n");
+	if (final_state == GAME_DRAW) {
+		buffer = safe_strjoin(buffer, "The Game ended in a Draw !\n");
+	} else if (final_state == ONE_TEAM_REMAINING) {
+		buffer = safe_strjoin(buffer, "Team ");
+		tmp = ft_itoa(winner);
+		buffer = safe_strjoin(buffer, tmp);
+		buffer = safe_strjoin(buffer, " won the game\n");
+	}
+	buffer = safe_strjoin(buffer, "Exiting in 5 seconds...\n");
+	
+	write(STDOUT_FILENO, buffer, ft_strlen(buffer));
+	
+	free(buffer);
+	free(tmp);
+	buffer = NULL;
+	tmp = NULL;
 	sleep(5);
 }
 
@@ -77,28 +128,28 @@ static void	handle_sigint(int sig)
     sig_running = 0;
 }
 
-void	TextMode(t_ipc *ipc)
+void	text_mode(t_ipc *ipc)
 {
 	signal(SIGINT, handle_sigint);
 	while (sig_running) {
 		if (ipc->first_process) {
-			FtPrintf("Unavailable board, quitting the game\n");
+			ft_printf("Unavailable board, quitting the game\n");
 			sleep(2);
 			break;
 		}
 
-		DisplayGame(ipc);
+		display_game(ipc);
 
-		SemLock(ipc);
+		sem_lock(ipc);
 		e_game_state	current_state = ipc->board->state;
 		if (current_state == GAME_DRAW || current_state == ONE_TEAM_REMAINING) {
-			SemUnlock(ipc);
-			DisplayEndGame(ipc);
+			sem_unlock(ipc);
+			display_end_game(ipc);
 			break;
 		}
-		SemUnlock(ipc);
+		sem_unlock(ipc);
 		usleep(100000);
 	}
 	if (!sig_running)
-		FtPrintf("Visualizer stopped by user with Ctrl-C\n");
+		ft_printf("Visualizer stopped by user with Ctrl-C\n");
 }
