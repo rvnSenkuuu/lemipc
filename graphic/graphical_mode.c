@@ -55,12 +55,15 @@ static void	draw_game(t_ipc *ipc, int team_count, Color *team_color)
 
 	int	hud_pos_x = (SCREEN_WIDTH - 200) + 15;
 	int	hud_pos_y = 15;
-	DrawText(TextFormat("Game State: %s", get_game_state(state)), hud_pos_x, hud_pos_y, 18, RAYWHITE);
-	DrawText(TextFormat("Player Count: %d", player_count), hud_pos_x, hud_pos_y + 40, 18, RAYWHITE);
+	int	font_size = 18;
+	DrawText(TextFormat("Game State: %s", get_game_state(state)), hud_pos_x, hud_pos_y, font_size, RAYWHITE);
+	DrawText(TextFormat("Player Count: %d", player_count), hud_pos_x, hud_pos_y + 40, font_size, RAYWHITE);
 }
 
 static void	draw_end_game(t_ipc *ipc, Color *winner_team_color)
 {
+	size_t	font_size = 20;
+
 	sem_lock(ipc);
 	e_game_state	final_state = ipc->board->state;
 	int	winner = ipc->board->winner_team;
@@ -69,9 +72,9 @@ static void	draw_end_game(t_ipc *ipc, Color *winner_team_color)
 	BeginDrawing();
 	ClearBackground(BLACK);
 	if (final_state == GAME_DRAW) {
-		DrawText("The game is draw", SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2, 20, RAYWHITE);
+		DrawText("The game is draw", SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2, font_size, RAYWHITE);
 	} else if (final_state == ONE_TEAM_REMAINING) {
-		DrawText(TextFormat("Team %d won !", winner), SCREEN_WIDTH / 2 - 70, SCREEN_HEIGHT / 2, 20, RAYWHITE);
+		DrawText(TextFormat("Team %d won !", winner), SCREEN_WIDTH / 2 - 70, SCREEN_HEIGHT / 2, font_size, RAYWHITE);
 		Rectangle	rec = {
 			.x = SCREEN_WIDTH / 2 - 45,
 			.y = SCREEN_HEIGHT / 2 + 50, 
@@ -82,7 +85,7 @@ static void	draw_end_game(t_ipc *ipc, Color *winner_team_color)
 	EndDrawing();
 }
 
-void	GraphicalMode(t_ipc *ipc, int team_count)
+void	graphical_mode(t_ipc *ipc, int team_count)
 {
 	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE);
 	SetTargetFPS(60);

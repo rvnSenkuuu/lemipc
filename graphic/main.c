@@ -4,7 +4,7 @@
 #include "lemipc.h"
 
 void	text_mode(t_ipc *ipc);
-void	GraphicalMode(t_ipc *ipc, int team_count);
+void	graphical_mode(t_ipc *ipc, int team_count);
 
 static bool	check_args(int argc, char **argv, int *team_count, bool *text_mode)
 {
@@ -41,7 +41,7 @@ int	main(int argc, char **argv)
 	if (text_mode_opt)
 		text_mode(&ipc);
 	else
-		GraphicalMode(&ipc, team_count);
+		graphical_mode(&ipc, team_count);
 
 	clean_ipc(&ipc);
 	return 0;
