@@ -5,3 +5,4 @@ lib/libft/.objs
 lib/libft/libft.a
 lemipc
 glemipc
+lemipc_key

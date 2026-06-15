@@ -1,5 +1,8 @@
+#include <signal.h>
 #include "libft.h"
 #include "lemipc.h"
+
+static volatile sig_atomic_t	sig_running = 1;
 
 static void wait_for_players(t_ipc *ipc, int player_count)
 {
@@ -27,6 +30,12 @@ static void	leave_game(t_ipc *ipc, t_player *player)
 	ipc->board->player_count--;
 }
 
+static void	handle_sigint(int sig)
+{
+	(void)sig;
+	sig_running = 0;
+}
+
 static void	start_game(t_ipc *ipc, t_player *player)
 {
 	t_player	target = {
@@ -34,7 +43,9 @@ static void	start_game(t_ipc *ipc, t_player *player)
 			.pos_x = -1,
 			.pos_y = -1,
 			.team_id = -1};
-	while (1) {
+
+	signal(SIGINT, handle_sigint);
+	while (sig_running) {
 		sem_lock(ipc);
 		e_game_state	current_state = ipc->board->state;
 		if (current_state == ONE_TEAM_REMAINING || current_state == GAME_DRAW) {
@@ -64,7 +75,6 @@ static void	start_game(t_ipc *ipc, t_player *player)
 		usleep(500000);
 		if (target.pos_x != -1)
 			send_target_to_team(ipc, &target, player->team_id);
-
 	}
 }
 
