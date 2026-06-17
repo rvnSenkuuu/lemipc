@@ -10,7 +10,6 @@ int	put_player_on_board(t_ipc *ipc, t_player *player)
 
 	int	count = 0;
 	int	empty_cell[BOARD_SIZE][2];
-
 	for (int i = 0; i < BOARD_SIZE; i++) {
 		if (ipc->board->map[i] == EMPTY_CELL) {
 			empty_cell[count][__X_POS] = i % BOARD_WIDTH;
@@ -53,7 +52,8 @@ int	check_player_around(t_board *board, t_player *player)
 			if (team_id > EMPTY_CELL && team_id != player->team_id) {
 				if (search_team_index(cells, count, team_id))
 					return 1;
-				cells[count++] = team_id;
+				cells[count] = team_id;
+				count++;
 			}
 		}
 	}
@@ -85,8 +85,8 @@ void	update_target(t_ipc *ipc, t_player *player, t_player *target)
 	
 	if (!receive_target_from_team(ipc, &msg, player->team_id)) {
 		t_player	team_target = {
-			.pos_x   = msg.target_x,
-			.pos_y   = msg.target_y,
+			.pos_x = msg.target_x,
+			.pos_y = msg.target_y,
 			.team_id = msg.target_id};
 		if (is_valid_target(ipc->board, &team_target)) {
 			*target = team_target;
@@ -94,8 +94,8 @@ void	update_target(t_ipc *ipc, t_player *player, t_player *target)
 		}
 	}
  
-	target->pos_x   = -1;
-	target->pos_y   = -1;
+	target->pos_x = -1;
+	target->pos_y = -1;
 	target->team_id = -1;
 	find_nearest_target(ipc->board, player, target);
 }
@@ -137,6 +137,7 @@ void	random_move(t_board *board, t_player *player)
 		}
 	}
 }
+
 void	move_player(t_board *board, t_player *player, t_player *target)
 {
 	if (target->pos_x == -1) {
