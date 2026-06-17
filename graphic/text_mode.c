@@ -1,4 +1,5 @@
 #include <signal.h>
+#include <assert.h>
 #include "libft.h"
 #include "lemipc.h"
 
@@ -10,13 +11,14 @@ static char	*safe_strjoin(char *s1, char *s2)
 {
 	size_t	s1_len = ft_strlen(s1);
 	size_t	s2_len = ft_strlen(s2);
-	char	*output = ft_calloc((s1_len + s2_len) + 1, sizeof(char));
-	if (!output)
-		return (NULL);
+	char	*output = malloc(sizeof(char) * (s1_len + s2_len) + 1);
+	assert(output != NULL && "malloc failed");
+
 	for (size_t i = 0; i < s1_len; i++)
 		output[i] = s1[i];
 	for (size_t i = 0; i < s2_len; i++, s1_len++)
 		output[s1_len] = s2[i];
+	output[s1_len] = '\0';
 	free(s1);
 	return output;
 }
@@ -151,5 +153,5 @@ void	text_mode(t_ipc *ipc)
 		usleep(100000);
 	}
 	if (!sig_running)
-		ft_printf("Visualizer stopped by user with Ctrl-C\n");
+		ft_printf("Visualizer stopped by user with Ctrl-C");
 }
