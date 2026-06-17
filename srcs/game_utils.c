@@ -26,7 +26,7 @@ void	get_team_and_player_count(t_ipc *ipc, size_t *team_count, size_t *killer_te
 			if (!tmp) {
 				free(teams);
 				teams = NULL;
-				ft_dprintf(STDERR_FILENO, "%s: realloc: %s\n", PROGRAM_NAME, strerror(errno));
+				ft_dprintf(STDERR_FILENO, "%s: %s realloc: %s\n", PROGRAM_NAME, __func__, strerror(errno));
 				exit(EXIT_FAILURE);
 			}
 			teams = tmp;

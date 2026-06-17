@@ -47,7 +47,7 @@ static void	draw_game(t_ipc *ipc, int team_count, Color *team_color)
 				.width = cell_width - 2,
 				.height = cell_height - 2};
 			float	hue = fmod((cell - 1) * slice, 360.0f);
-			Color player_color = ColorFromHSV(hue, 0.85f, 0.95f);
+			Color	player_color = ColorFromHSV(hue, 0.85f, 0.95f);
 			*team_color = player_color;
 			DrawRectangleRounded(player, 0.2f, 0, player_color);
 		}

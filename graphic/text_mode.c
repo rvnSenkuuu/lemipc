@@ -12,7 +12,10 @@ static char	*safe_strjoin(char *s1, char *s2)
 	size_t	s1_len = ft_strlen(s1);
 	size_t	s2_len = ft_strlen(s2);
 	char	*output = malloc(sizeof(char) * (s1_len + s2_len) + 1);
-	assert(output != NULL && "malloc failed");
+	if (!output) {
+		ft_dprintf(STDERR_FILENO, "%s: %s malloc: %s\n", PROGRAM_NAME, __func__, strerror(errno));
+		exit(EXIT_FAILURE);
+	}
 
 	for (size_t i = 0; i < s1_len; i++)
 		output[i] = s1[i];
