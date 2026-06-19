@@ -80,6 +80,11 @@ static void	start_game(t_ipc *ipc, t_player *player)
 		if (target.pos_x != -1)
 			send_target_to_team(ipc, &target, player->team_id);
 	}
+	
+	if (!sig_running) {
+		sem_unlock(ipc);
+		leave_game(ipc, player);
+	}
 }
 
 static bool	check_args(int argc, int team_id, int player_count)
