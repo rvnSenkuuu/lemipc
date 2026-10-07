@@ -1,6 +1,6 @@
 # Lemipc
 
-![image](./Screenshot.png)
+![image](./assets/Screenshot.png)
 
 A multi-process game in C where independent player processes compete on a shared map, synchronized through System V IPC (shared memory and semaphores).
 
